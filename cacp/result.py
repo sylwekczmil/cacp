@@ -6,6 +6,12 @@ from cacp.util import to_latex
 
 
 def process_comparison_results(result_dir: Path):
+    """
+    Processes comparison results, computes mean values for all metrics.
+
+    :param result_dir: results directory
+
+    """
     df = pd.read_csv(result_dir.joinpath('comparison.csv'))
 
     gb = ['algorithm']

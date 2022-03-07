@@ -6,6 +6,12 @@ from cacp.util import to_latex
 
 
 def process_times(result_dir: Path):
+    """
+    Processes comparison results times.
+
+    :param result_dir: results directory
+
+    """
     df = pd.read_csv(result_dir.joinpath('comparison.csv'))
     time_dir = result_dir.joinpath('time')
     time_dir.mkdir(exist_ok=True, parents=True)

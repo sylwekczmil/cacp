@@ -8,6 +8,7 @@ Welcome to cacp's documentation!
    readme
    installation
    example_results
+   modules
    contributing
    authors
 

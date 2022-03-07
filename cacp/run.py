@@ -23,6 +23,20 @@ def run_experiment(
     normalized: bool = False,
     seed: int = 1
 ):
+    """
+    [Main CACP Function] Runs automatic comparison of the performance evaluation of supervised classification
+    algorithms by evaluating metrics on multiple datasets.
+
+    :param datasets: dataset collection
+    :param classifiers: classifiers collection
+    :param results_directory: results directory
+    :param n_folds: number of folds {5,10}
+    :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
+    :param categorical_to_numerical: if dataset categorical values should be converted to numerical
+    :param normalized: if the data should be normalized in range [0..1]
+    :param seed: random seed value
+
+    """
     seed_everything(seed)
     result_dir = Path(results_directory)
     result_dir.mkdir(exist_ok=True, parents=True)

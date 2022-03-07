@@ -1,3 +1,4 @@
+import pathlib
 import typing
 from pathlib import Path
 
@@ -8,6 +9,13 @@ from cacp.util import to_latex
 
 
 def dataset_info(datasets: typing.Iterable[ClassificationDataset], result_dir: Path):
+    """
+    Produces results files with list of all datasets used in experiment alog with their attributes.
+
+    :param datasets: dataset collection
+    :param result_dir: results directory
+
+    """
     records = []
     for dataset_idx, dataset in enumerate(datasets):
         row = {
@@ -32,7 +40,14 @@ def dataset_info(datasets: typing.Iterable[ClassificationDataset], result_dir: P
     f.write(tex)
 
 
-def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callable]], result_dir: Path):
+def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callable]], result_dir: pathlib.Path):
+    """
+    Produces results files with list of all classifiers used in experiment along with their attributes.
+
+    :param classifiers: classifiers collection
+    :param result_dir: results directory
+
+    """
     records = []
     for cn, c in classifiers:
         cz = c(2, 2).__class__

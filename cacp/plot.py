@@ -5,6 +5,12 @@ import pandas as pd
 
 
 def process_comparison_results_plots(result_dir: Path):
+    """
+    Generates plots from comparison results.
+
+    :param result_dir: results directory
+
+    """
     df_results = pd.read_csv(result_dir.joinpath('comparison.csv'))
     plot_dir = result_dir.joinpath('plot')
     plot_dir.mkdir(exist_ok=True, parents=True)

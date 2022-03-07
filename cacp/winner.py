@@ -5,7 +5,15 @@ import pandas as pd
 from cacp.util import to_latex
 
 
-def process_comparison_result_winners_for_metric(metric: str, result_dir: Path):
+def process_comparison_result_winners_for_metric(metric: str, result_dir: Path) -> pd.DataFrame:
+    """
+    Processes comparison results, finds winners for metric.
+
+    :param metric: comparison metric {auc, accuracy, precision, recall, f1}
+    :param result_dir: results directory
+    :return: DateFrame with winners for metric
+
+    """
     df = pd.read_csv(result_dir.joinpath('comparison.csv'))
     algorithms = df['algorithm'].unique()
     places = [i for i in range(min(len(algorithms), 3))]
@@ -53,6 +61,12 @@ def process_comparison_result_winners_for_metric(metric: str, result_dir: Path):
 
 
 def process_comparison_result_winners(result_dir: Path):
+    """
+    Processes comparison results, finds winners.
+
+    :param result_dir: results directory
+
+    """
     auc_wins = process_comparison_result_winners_for_metric('auc', result_dir).sort_values(by=['algorithm'])
     acc_wins = process_comparison_result_winners_for_metric('accuracy', result_dir).sort_values(by=['algorithm'])
     wins_df = auc_wins[['algorithm']].copy()

@@ -34,19 +34,19 @@ class DatasetDescriptionFields(str, Enum):
     Outputs = "@outputs"
 
 
-class DownloadProgressBar(tqdm):
+class ClassificationDatasetDownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, t_size=None):
         if t_size is not None:
             self.total = t_size
         self.update(b * bsize - self.n)
 
 
-class DatasetMalformedException(Exception):
-    pass
-
-
 @dataclasses.dataclass
 class ClassificationFoldData:
+    """
+    Class that represents single dataset fold.
+    """
+
     index: int
     labels: np.ndarray = dataclasses.field()
 
@@ -65,6 +65,10 @@ class ClassificationFoldData:
 
 @dataclasses.dataclass
 class ClassificationDataset:
+    """
+    Class that represents single dataset.
+    """
+
     name: AVAILABLE_CLASSIFICATION_DATASET_NAMES
     output: str = dataclasses.field(default='Class')
     origin: str = dataclasses.field(default='')
@@ -172,13 +176,19 @@ class ClassificationDataset:
             url = f'{BASE_KEEL_URL}{file_name}'
             # KEEL page sometimes fails on ssl cert (we can not fix it)
             ssl._create_default_https_context = ssl._create_unverified_context
-            with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=f'Downloading {file_name}') as t:
+            with ClassificationDatasetDownloadProgressBar(unit='B', unit_scale=True, miniters=1,
+                                                          desc=f'Downloading {file_name}') as t:
                 urlretrieve(url, filename=out_file_path, reporthook=t.update_to)
 
         return out_file_path
 
 
-def all_datasets():
+def all_datasets() -> typing.List[ClassificationDataset]:
+    """
+    Gets all available datasets
+
+    :return: all classification datasets
+    """
     return [
         ClassificationDataset(name) for name in typing.get_args(AVAILABLE_CLASSIFICATION_DATASET_NAMES)
     ]
