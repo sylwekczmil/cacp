@@ -1,0 +1,5 @@
+,algorithm,1st,2nd,3rd
+1,RF,2,0,1
+2,DT,1,0,2
+3,KNN,1,1,1
+4,SVC,0,3,0

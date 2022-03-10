@@ -1,0 +1,5 @@
+,Dataset,Instances,Features,Classes
+1,iris,150,4,3
+2,wisconsin,683,9,2
+3,pima,768,8,2
+4,wdbc,569,30,2

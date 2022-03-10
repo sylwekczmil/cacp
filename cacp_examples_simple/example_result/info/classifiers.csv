@@ -1,0 +1,5 @@
+,Acronym,Name,Library,Type
+1,DT,DecisionTree,sklearn,offline
+2,KNN,KNeighbors,sklearn,offline
+3,RF,RandomForest,sklearn,offline
+4,SVC,SVC,sklearn,offline
