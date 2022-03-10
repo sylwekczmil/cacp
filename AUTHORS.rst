@@ -5,8 +5,12 @@ Credits
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Sylwester Czmil
+* Jacek Kluska
+* Anna Czmil
 
+
+We encourage you to contribute to this project :)
 
 Template
 --------
