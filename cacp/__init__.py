@@ -2,7 +2,7 @@
 
 __author__ = """Sylwester Czmil"""
 __email__ = 'sylwekczmil@gmail.com'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 from cacp.dataset import ClassificationDataset, ClassificationFoldData, all_datasets
 from cacp.run import run_experiment
