@@ -116,7 +116,8 @@ class ClassificationDataset:
         attributes_types_names = []
         inputs = []
         output_name = 'Class'
-        with file_path.open('r') as file:
+        # KEEL descriptions files contain latin1 chars
+        with file_path.open('r', encoding='latin1') as file:
             for line in file:
                 if '@attribute' in line or '@Attribute' in line:
                     if '{' in line:
