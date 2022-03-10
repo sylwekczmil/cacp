@@ -28,11 +28,48 @@ To install cacp, run this command in your terminal:
     pip install cacp
 
 
-Usage
------
+Simple Usage
+--------------
+An example usage of this library is included in the package:
+https://github.com/sylwekczmil/cacp/tree/main/cacp_examples_simple.
+
+.. code:: python3
+
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.svm import SVC
+    from sklearn.tree import DecisionTreeClassifier
+
+    from cacp import run_experiment, ClassificationDataset
+
+    # select datasets
+    experimental_datasets = [
+        ClassificationDataset('iris'),
+        ClassificationDataset('wisconsin'),
+        ClassificationDataset('pima'),
+        ClassificationDataset('wdbc'),
+    ]
+
+    # select classifiers
+    experimental_classifiers = [
+        ('SVC', lambda n_inputs, n_classes: SVC()),
+        ('DT', lambda n_inputs, n_classes: DecisionTreeClassifier(max_depth=5)),
+        ('RF', lambda n_inputs, n_classes: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)),
+        ('KNN', lambda n_inputs, n_classes: KNeighborsClassifier(3)),
+    ]
+
+    # trigger experiment run
+    run_experiment(
+        experimental_datasets,
+        experimental_classifiers,
+        results_directory='./example_result'
+    )
 
 
-An example of this library usage is included in the package
+Advanced Usage
+---------------
+
+An advanced example usage of this library is included in the package:
 https://github.com/sylwekczmil/cacp/tree/main/cacp_examples.
 
 .. code:: python3
