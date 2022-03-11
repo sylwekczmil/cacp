@@ -1,3 +1,11 @@
+from cacp import all_datasets
+
+
+def test_dataset_all():
+    datasets = all_datasets()
+    assert len(datasets) == 69
+
+
 def test_dataset_0(datasets):
     ds = datasets[0]
     assert ds.name == 'iris'

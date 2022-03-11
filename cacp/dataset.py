@@ -192,5 +192,5 @@ def all_datasets() -> typing.List[ClassificationDataset]:
     :return: all classification datasets
     """
     return [
-        ClassificationDataset(name) for name in typing.get_args(AVAILABLE_CLASSIFICATION_DATASET_NAMES)
+        ClassificationDataset(name) for name in typing_extensions.get_args(AVAILABLE_CLASSIFICATION_DATASET_NAMES)
     ]
