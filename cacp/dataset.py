@@ -1,6 +1,7 @@
 import dataclasses
 import ssl
 import typing
+import typing_extensions
 from enum import Enum
 from pathlib import Path
 from urllib.request import urlretrieve
@@ -13,7 +14,7 @@ from tqdm import tqdm
 
 BASE_KEEL_URL = 'https://sci2s.ugr.es/keel/dataset/data/classification/'
 
-AVAILABLE_CLASSIFICATION_DATASET_NAMES = typing.Literal[
+AVAILABLE_CLASSIFICATION_DATASET_NAMES = typing_extensions.Literal[
     'abalone', 'appendicitis', 'australian', 'automobile', 'balance', 'banana', 'bands',
     'breast', 'bupa', 'car', 'chess', 'cleveland', 'coil2000', 'contraceptive', 'crx',
     'dermatology', 'ecoli', 'flare', 'german', 'glass', 'haberman', 'hayes-roth', 'heart',
@@ -26,7 +27,7 @@ AVAILABLE_CLASSIFICATION_DATASET_NAMES = typing.Literal[
     'winequality-white', 'wisconsin', 'yeast', 'zoo'
 ]
 
-AVAILABLE_N_FOLDS = typing.Literal[5, 10]
+AVAILABLE_N_FOLDS = typing_extensions.Literal[5, 10]
 
 
 class DatasetDescriptionFields(str, Enum):

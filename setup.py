@@ -15,6 +15,7 @@ requirements = [
     'pandas>=1.1.5',
     'scikit-learn>=0.24.1',
     'tqdm>=4.62.3',
+    'typing-extensions>=4.1.1'
 ]
 
 test_requirements = ['pytest>=3', ]
@@ -22,13 +23,14 @@ test_requirements = ['pytest>=3', ]
 setup(
     author="Sylwester Czmil",
     author_email='sylwekczmil@gmail.com',
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',

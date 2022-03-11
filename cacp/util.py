@@ -53,6 +53,10 @@ def to_latex(df: pd.DataFrame, **kwargs) -> str:
     lines.insert(5, hline)
     lines.insert(7, hline)
     lines.insert(-3, hline)
+
+    # this fixes difference between python 3.7 and later versions
+    lines[6] = lines[6].replace('{', '').replace('}', '')
+
     tex = '\n'.join(lines)
 
     tex = tex.replace(' accuracy ', ' ACC ').replace(' auc ', ' AUC ').replace(' algorithm ', ' Algorithm ') \
