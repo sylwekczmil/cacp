@@ -28,6 +28,12 @@ To install cacp, run this command in your terminal:
     pip install cacp
 
 
+Usage
+------
+Jupyter Notebook on Kaggle:
+https://www.kaggle.com/sc4444/cacp-example-usage
+
+
 Simple Usage
 --------------
 An example usage of this library is included in the package:
