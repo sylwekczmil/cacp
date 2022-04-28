@@ -122,4 +122,11 @@ https://github.com/sylwekczmil/cacp/tree/main/cacp_examples.
     )
 
 
+Defining custom classifier wrapper:
+https://github.com/sylwekczmil/cacp/tree/main/cacp_examples/example_custom_classifiers/xgboost.py.
 
+Defining custom dataset:
+https://github.com/sylwekczmil/cacp/tree/main/cacp_examples/example_custom_datasets/random_dataset.py
+
+Defining local dataset:
+https://github.com/sylwekczmil/cacp/tree/main/cacp_examples/example_custom_datasets/local_dataset.py
