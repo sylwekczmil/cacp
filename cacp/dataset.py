@@ -1,7 +1,7 @@
 import dataclasses
 import ssl
 import typing
-import typing_extensions
+from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 from urllib.request import urlretrieve
@@ -9,6 +9,7 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
+import typing_extensions
 from sklearn import preprocessing
 from tqdm import tqdm
 
@@ -30,6 +31,87 @@ AVAILABLE_CLASSIFICATION_DATASET_NAMES = typing_extensions.Literal[
 AVAILABLE_N_FOLDS = typing_extensions.Literal[5, 10]
 
 
+@dataclasses.dataclass
+class ClassificationFoldData:
+    """
+    Class that represents single dataset fold.
+    """
+
+    index: int = dataclasses.field()
+    labels: np.ndarray = dataclasses.field()
+
+    x_train: np.ndarray = dataclasses.field(repr=False)
+    y_train: np.ndarray = dataclasses.field(repr=False)
+    x_test: np.ndarray = dataclasses.field(repr=False)
+    y_test: np.ndarray = dataclasses.field(repr=False)
+
+
+class ClassificationFoldDataModifierBase(ABC):
+
+    @abstractmethod
+    def modify(self, fold: ClassificationFoldData) -> ClassificationFoldData:
+        pass
+
+
+class ClassificationFoldDataNormalizer(ClassificationFoldDataModifierBase):
+
+    def modify(self, fold: ClassificationFoldData) -> ClassificationFoldData:
+        x_tra_len = len(fold.x_train)
+        x = np.concatenate([fold.x_train.astype(float), fold.x_test.astype(float)])
+        min_max_scaler = preprocessing.MinMaxScaler()
+        x = min_max_scaler.fit_transform(x)
+        x_train, x_test = x[:x_tra_len], x[x_tra_len:]
+        return ClassificationFoldData(
+            index=fold.index,
+            labels=fold.labels,
+            x_train=x_train,
+            y_train=fold.y_train,
+            x_test=x_test,
+            y_test=fold.y_test
+        )
+
+
+class ClassificationDatasetBase(ABC):
+    """
+    Base class for classification dataset that represents single dataset.
+    """
+
+    @abstractmethod
+    def folds(
+        self,
+        n_folds: AVAILABLE_N_FOLDS = 10,
+        dob_scv: bool = True,
+        categorical_to_numerical=True
+    ) -> typing.Iterable[ClassificationFoldData]:
+        pass
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def instances(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def features(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def classes(self) -> int:
+        pass
+
+    def __str__(self):
+        return f'Dataset name: {self.name}, ' \
+               f'instances: {self.instances}, ' \
+               f'features: {self.features}, ' \
+               f'classes: {self.classes}'
+
+
 class DatasetDescriptionFields(str, Enum):
     Inputs = "@inputs"
     Outputs = "@outputs"
@@ -42,48 +124,68 @@ class ClassificationDatasetDownloadProgressBar(tqdm):
         self.update(b * bsize - self.n)
 
 
-@dataclasses.dataclass
-class ClassificationFoldData:
+class ClassificationDataset(ClassificationDatasetBase):
     """
-    Class that represents single dataset fold.
-    """
-
-    index: int
-    labels: np.ndarray = dataclasses.field()
-
-    x_train: np.ndarray = dataclasses.field(repr=False)
-    y_train: np.ndarray = dataclasses.field(repr=False)
-    x_test: np.ndarray = dataclasses.field(repr=False)
-    y_test: np.ndarray = dataclasses.field(repr=False)
-
-    def normalize(self):
-        x_tra_len = len(self.x_train)
-        x = np.concatenate([self.x_train.astype(float), self.x_test.astype(float)])
-        min_max_scaler = preprocessing.MinMaxScaler()
-        x = min_max_scaler.fit_transform(x)
-        self.x_train, self.x_test = x[:x_tra_len], x[x_tra_len:]
-
-
-@dataclasses.dataclass
-class ClassificationDataset:
-    """
-    Class that represents single dataset.
+    Class that represents KEEL single dataset.
     """
 
-    name: AVAILABLE_CLASSIFICATION_DATASET_NAMES
-    output: str = dataclasses.field(default='Class')
-    origin: str = dataclasses.field(default='')
-    features: int = dataclasses.field(default=0)
-    classes: int = dataclasses.field(default=0)
-    instances: int = dataclasses.field(default=0)
-    attributes: typing.Dict[str, str] = dataclasses.field(default_factory=dict, repr=False)
-    files_cache_path: Path = dataclasses.field(default=Path.home().joinpath('cacp_files'), repr=False)
+    def __init__(self,
+                 name: AVAILABLE_CLASSIFICATION_DATASET_NAMES,
+                 files_cache_path=Path.home().joinpath('cacp_files')
+                 ):
+        """
+        Initializes class instance that represents KEEL single dataset.
 
-    def __post_init__(self):
-        self.files_cache_path.mkdir(exist_ok=True, parents=True)
+        :param name: KEEL dataset name
+        :param files_cache_path: optional cache file patch where dataset will be downloaded
+        """
+
+        self._name = name
+
+        self._instances = 0
+        self._features = 0
+        self._classes = 0
+
+        self._output = 'Class'
+        self._origin = ''
+        self._attributes: typing.Dict[str, str] = {}
+
+        self._files_cache_path = files_cache_path
+        self._files_cache_path.mkdir(exist_ok=True, parents=True)
+
         self._load_description()
 
-    def folds(self, n_folds: AVAILABLE_N_FOLDS = 10, dob_scv: bool = True, categorical_to_numerical=True):
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def instances(self) -> int:
+        return self._instances
+
+    @property
+    def features(self) -> int:
+        return self._features
+
+    @property
+    def classes(self) -> int:
+        return self._classes
+
+    @property
+    def origin(self) -> str:
+        return self._origin
+
+    @property
+    def output_name(self) -> str:
+        return self._output_name
+
+    def folds(
+        self,
+        n_folds: AVAILABLE_N_FOLDS = 10,
+        dob_scv: bool = True,
+        categorical_to_numerical=True
+    ) -> typing.Iterable[ClassificationFoldData]:
+
         zip_data_name = f'{self.name}-{n_folds}-{"dobscv" if dob_scv else "fold"}'
         data_path = self._fetch_data(zip_data_name, dob_scv)
         if dob_scv:
@@ -135,32 +237,32 @@ class ClassificationDataset:
                 elif '@output' in line:
                     output_name = line.split()[1]
                 elif 'Origin.' in line:
-                    self.origin = line.split('Origin.')[1].strip()
+                    self._origin = line.split('Origin.')[1].strip()
                 elif 'Features.' in line:
-                    self.features = int(line.split('Features.')[1].strip())
+                    self._features = int(line.split('Features.')[1].strip())
                 elif 'Classes.' in line:
-                    self.classes = int(line.split('Classes.')[1].strip())
+                    self._classes = int(line.split('Classes.')[1].strip())
                 elif 'Instances.' in line:
-                    self.instances = int(line.split('Instances.')[1].split()[0].strip())
+                    self._instances = int(line.split('Instances.')[1].split()[0].strip())
 
-        self.attributes = {n: t for n, t in zip(attributes_names, attributes_types_names)}
-        self.output_name = output_name
+        self._attributes = {n: t for n, t in zip(attributes_names, attributes_types_names)}
+        self._output_name = output_name
 
     def _load_data(self, path: Path, categorical_to_numerical: bool) -> typing.Tuple[np.ndarray, np.ndarray]:
-        skip_rows = 4 + len(self.attributes)
-        df = pd.read_csv(path, skiprows=skip_rows, names=self.attributes.keys(), na_values='?')
+        skip_rows = 4 + len(self._attributes)
+        df = pd.read_csv(path, skiprows=skip_rows, names=self._attributes.keys(), na_values='?')
         if categorical_to_numerical:
-            for attr_name, attr_type_name in self.attributes.items():
+            for attr_name, attr_type_name in self._attributes.items():
                 if attr_type_name == 'category':
                     df[attr_name] = df[attr_name].astype('category').cat.codes.values
 
-        y = df[self.output_name].values
-        del df[self.output_name]
+        y = df[self._output_name].values
+        del df[self._output_name]
         x = df.values
         return x, y
 
     def _fetch_data(self, data_name: str, dob_scv: bool) -> Path:
-        data_path = self.files_cache_path.joinpath(data_name)
+        data_path = self._files_cache_path.joinpath(data_name)
         data_unzip_path = data_path
         if dob_scv:
             data_path = data_path.joinpath(self.name)
@@ -173,7 +275,7 @@ class ClassificationDataset:
         return data_path
 
     def _fetch_file(self, file_name: str) -> Path:
-        out_file_path = self.files_cache_path.joinpath(file_name)
+        out_file_path = self._files_cache_path.joinpath(file_name)
         if not out_file_path.exists():
             url = f'{BASE_KEEL_URL}{file_name}'
             # KEEL page sometimes fails on ssl cert (we can not fix it)
@@ -183,6 +285,27 @@ class ClassificationDataset:
                 urlretrieve(url, filename=out_file_path, reporthook=t.update_to)
 
         return out_file_path
+
+
+class LocalClassificationDataset(ClassificationDataset):
+    """
+    Class that represents single local dataset that has similar structure to KEEL dataset.
+    """
+
+    def __init__(self, name: str, dataset_directory: Path):
+        """
+        Initializes class instance that represents KEEL single dataset.
+
+        :param name: KEEL dataset name
+        :param dataset_directory: directory where dataset is stored
+        """
+        super().__init__(name, dataset_directory)
+
+    def _fetch_data(self, data_name: str, dob_scv: bool) -> Path:
+        return self._files_cache_path
+
+    def _fetch_file(self, file_name: str) -> Path:
+        return self._files_cache_path.joinpath(file_name)
 
 
 def all_datasets() -> typing.List[ClassificationDataset]:

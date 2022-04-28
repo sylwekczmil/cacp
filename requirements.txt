@@ -10,7 +10,7 @@ twine~=1.14.0
 
 pytest~=7.0.1
 
-Jinja2>=3.0.3
+Jinja2~=3.0.3
 joblib>=1.1.0
 matplotlib>=3.3.4
 numpy>=1.18.5
