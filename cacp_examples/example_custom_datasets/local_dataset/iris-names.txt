@@ -1,0 +1,23 @@
+Iris plants dataset
+
+1: Description.
+
+This is perhaps the best known database to be found in the pattern recognition literature. The data set contains 3 classes of 50 instances each, where each class refers to a type of iris plant. One class is linearly separable from the other 2; the latter are NOT linearly separable from each other. 
+
+2: Type.			Classification	
+3: Origin.			Real world
+4: Instances.		150
+5: Features.		4
+6: Classes.			3	
+7: Missing values.	No
+
+8: Header.
+
+@relation iris
+@attribute SepalLength real [4.3, 7.9]
+@attribute SepalWidth real [2.0, 4.4]
+@attribute PetalLength real [1.0, 6.9]
+@attribute PetalWidth real [0.1, 2.5]
+@attribute Class {Iris-setosa, Iris-versicolor, Iris-virginica}
+@inputs SepalLength, SepalWidth, PetalLength, PetalWidth
+@outputs Class

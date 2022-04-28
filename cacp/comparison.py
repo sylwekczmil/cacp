@@ -9,12 +9,13 @@ from joblib import delayed, Parallel
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tqdm import tqdm
 
-from cacp.dataset import ClassificationDataset, AVAILABLE_N_FOLDS, ClassificationFoldData
+from cacp.dataset import ClassificationDatasetBase, ClassificationFoldData, AVAILABLE_N_FOLDS, \
+    ClassificationFoldDataModifierBase, ClassificationFoldDataNormalizer
 from cacp.util import auc_score
 
 
 def process_comparison_single(classifier_factory, classifier_name,
-                              dataset: ClassificationDataset,
+                              dataset: ClassificationDatasetBase,
                               fold: ClassificationFoldData) -> dict:
     """
     Runs comparison on single classifier and dataset.
@@ -56,13 +57,14 @@ def process_comparison_single(classifier_factory, classifier_name,
 
 
 def process_comparison(
-    datasets: typing.List[ClassificationDataset],
+    datasets: typing.List[ClassificationDatasetBase],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],
     result_dir: Path,
     n_folds: AVAILABLE_N_FOLDS = 10,
+    custom_fold_modifiers: typing.List[ClassificationFoldDataModifierBase] = None,
     dob_scv: bool = True,
     categorical_to_numerical=True,
-    normalized: bool = False,
+    normalized: bool = False
 ):
     """
     Runs comparison for provided datasets and classifiers.
@@ -71,6 +73,7 @@ def process_comparison(
     :param classifiers: classifiers collection
     :param result_dir: results directory
     :param n_folds: number of folds {5,10}
+    :param custom_fold_modifiers: custom fold modifiers that can change fold data before usage
     :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
     :param categorical_to_numerical: if dataset categorical values should be converted to numerical
     :param normalized: if the data should be normalized in range [0..1]
@@ -80,14 +83,26 @@ def process_comparison(
     records = []
     df = None
 
+    fold_modifiers = []
+
+    if custom_fold_modifiers:
+        fold_modifiers.extend(custom_fold_modifiers)
+
+    if normalized:
+        fold_modifiers.append(ClassificationFoldDataNormalizer())
+
     with tqdm(total=len(datasets) * n_folds, desc='Processing comparison', unit='fold') as pbar:
         for dataset_idx, dataset in enumerate(datasets):
             for fold in dataset.folds(n_folds=n_folds, dob_scv=dob_scv,
                                       categorical_to_numerical=categorical_to_numerical):
-                if normalized:
-                    fold.normalize()
+
+                modified_fold = fold
+                for fold_modifier in fold_modifiers:
+                    modified_fold = fold_modifier.modify(modified_fold)
+
                 rows = Parallel(n_jobs=len(classifiers))(
-                    delayed(process_comparison_single)(c, c_n, dataset, fold) for c_n, c in classifiers)
+                    delayed(process_comparison_single)(c, c_n, dataset, modified_fold) for c_n, c in classifiers
+                )
                 records.extend(rows)
                 pbar.update(1)
 

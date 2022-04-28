@@ -3,7 +3,7 @@ import typing
 from pathlib import Path
 
 from cacp.comparison import process_comparison
-from cacp.dataset import ClassificationDataset, AVAILABLE_N_FOLDS
+from cacp.dataset import AVAILABLE_N_FOLDS, ClassificationDatasetBase, ClassificationFoldDataModifierBase
 from cacp.info import dataset_info, classifier_info
 from cacp.plot import process_comparison_results_plots
 from cacp.result import process_comparison_results
@@ -14,10 +14,11 @@ from cacp.winner import process_comparison_result_winners
 
 
 def run_experiment(
-    datasets: typing.List[ClassificationDataset],
+    datasets: typing.List[ClassificationDatasetBase],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],
     results_directory: typing.Union[str, os.PathLike] = './result',
     n_folds: AVAILABLE_N_FOLDS = 10,
+    custom_fold_modifiers: typing.List[ClassificationFoldDataModifierBase] = None,
     dob_scv: bool = True,
     categorical_to_numerical=True,
     normalized: bool = False,
@@ -31,6 +32,7 @@ def run_experiment(
     :param classifiers: classifiers collection
     :param results_directory: results directory
     :param n_folds: number of folds {5,10}
+    :param custom_fold_modifiers: custom fold modifiers that can change fold data before usage
     :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
     :param categorical_to_numerical: if dataset categorical values should be converted to numerical
     :param normalized: if the data should be normalized in range [0..1]
@@ -48,7 +50,9 @@ def run_experiment(
         n_folds=n_folds,
         dob_scv=dob_scv,
         categorical_to_numerical=categorical_to_numerical,
-        normalized=normalized
+        normalized=normalized,
+        custom_fold_modifiers=custom_fold_modifiers
+
     )
     process_comparison_results(result_dir)
     process_comparison_results_plots(result_dir)

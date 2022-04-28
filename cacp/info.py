@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from cacp.dataset import ClassificationDataset
+from cacp.dataset import ClassificationDatasetBase
 from cacp.util import to_latex
 
 
-def dataset_info(datasets: typing.Iterable[ClassificationDataset], result_dir: Path):
+def dataset_info(datasets: typing.Iterable[ClassificationDatasetBase], result_dir: Path):
     """
     Produces results files with list of all datasets used in experiment alog with their attributes.
 
@@ -53,17 +53,20 @@ def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callab
         cz = c(2, 2).__class__
         library = cz.__module__.split('.')[0]
         name = cz.__name__
-        if cn == 'XGB':
-            library = 'xgboost'
         name = name.replace('Classifier', '')
-        if cn != 'SEVQ':
-            row = {
-                'Acronym': cn,
-                'Name': name,
-                'Library': library,
-                'Type': 'offline' if (library == 'sklearn' or library == 'xgboost') else 'incremental'
-            }
-            records.append(row)
+        classifier_type = 'custom'
+        if library == 'sklearn':
+            classifier_type = 'offline'
+        if library == 'skmultiflow':
+            classifier_type = 'incremental'
+
+        row = {
+            'Acronym': cn,
+            'Name': name,
+            'Library': library,
+            'Type': classifier_type
+        }
+        records.append(row)
 
     df = pd.DataFrame(records)
     df = df.drop_duplicates()
