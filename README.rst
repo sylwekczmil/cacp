@@ -16,7 +16,7 @@ CACP: Classification Algorithms Comparison Pipeline
 
 * Free software: MIT license
 * Documentation: https://cacp.readthedocs.io.
-
+* Article: https://doi.org/10.1016/j.softx.2022.101134
 
 Installation
 --------------
