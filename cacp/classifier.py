@@ -106,8 +106,10 @@ class Classifier:
         self.seed = seed if self.accepts_seed else None
         self.config_file_path: Path = Path()
         self.train_result_file_path: Path = Path()
+        self.train_result2_file_path: Path = Path()
         self.test_result_file_path: Path = Path()
         self.additional_result_file_path: Path = Path()
+        self.additional_result_file_path2: Path = Path()
 
     def _parse_data_from_list_file(self):
         methods_file_path = CLASSIFIER_DIR.joinpath("Methods.xml")
@@ -160,6 +162,8 @@ class Classifier:
                 parameter_min = float(parameter_domain_tag.find("lowerB").text)
                 parameter_max = float(parameter_domain_tag.find("upperB").text)
                 parameter_default = float(parameter_default)
+                if parameter_default.is_integer():
+                    parameter_default = int(parameter_default)
 
             parameter = ClassifierParameter(
                 name=parameter_name,
@@ -206,6 +210,7 @@ class Classifier:
         self.train_result_file_path = result_file_path.joinpath("result.tra")
         self.test_result_file_path = result_file_path.joinpath("result.tst")
         self.additional_result_file_path = result_file_path.joinpath("result.txt")
+        self.additional_result_file_path2 = result_file_path.joinpath("result2.txt")
 
         def path_to_keel_format(path: Path):
             return str(path).replace('\\', '/')
@@ -215,7 +220,8 @@ class Classifier:
             f'inputData = "{path_to_keel_format(train_file_path)}" "{path_to_keel_format(train_file_path)}" "{path_to_keel_format(test_file_path)}"',
             f'outputData = "{path_to_keel_format(self.train_result_file_path)}" '
             f'"{path_to_keel_format(self.test_result_file_path)}" '
-            f'"{path_to_keel_format(self.additional_result_file_path)}"',
+            f'"{path_to_keel_format(self.additional_result_file_path)}" '
+            f'"{path_to_keel_format(self.additional_result_file_path2)}"',
             ''
         ]
 
@@ -245,14 +251,11 @@ class Classifier:
         y_true = []
         y_pred = []
         with self.test_result_file_path.open("r") as f:
-            found_values = False
             for line in f.readlines():
-                if found_values:
+                if '@' not in line:
                     true, pred = line.split()
                     y_true.append(true)
                     y_pred.append(pred)
-                if "@data" in line:
-                    found_values = True
         return np.array(y_true), np.array(y_pred)
 
 
@@ -269,21 +272,43 @@ def all_classifiers() -> typing.List[Classifier]:
 
 if __name__ == '__main__':
 
-    for classifier in [
+    working = [
+        Classifier("FURIA-C"),
+        Classifier("OCEC-C"),
+        Classifier("C45Rules-C"),
+        Classifier("C45RulesSA-C"),
+        Classifier("1R-C"),
         Classifier("C45-C"),
+        Classifier("DT_GA-C"),
+        Classifier("EACH-C"),
+        Classifier("MPLCS-C"),
+        Classifier("OIGA-C"),
+        Classifier("AdaBoost.NC-C"),
         Classifier("CART-C"),
-        Classifier("C_SVM-C", parameters_overrides={"KERNELtype": "LINEAR"}),
-        Classifier("C_SVM-C", parameters_overrides={"KERNELtype": "POLY"}),
-        Classifier("C_SVM-C", parameters_overrides={"KERNELtype": "RBF"}),
-        Classifier("C_SVM-C", parameters_overrides={"KERNELtype": "SIGMOID"}),
-    ]:
+        Classifier("DT_Oblique-C"),
+        Classifier("FH-GBML-C"),
+        Classifier("Chi-RW-C"),
+        Classifier("Fuzzy-FARCHD-C"),
+        Classifier("Chi-RW-C"),
+    ]
+
+    not_working = [
+        Classifier("GFS-AdaBoost-C"),
+    ]
+
+    failed = []
+    for classifier in working:
         print(classifier)
         try:
             y_true, y_pred = classifier.fit_predict(
-                Path("dist/data/result_0").absolute(),
+                Path(f"dist/data/result/{classifier.name}").absolute(),
                 Path("dist/data/iris-10-1tra.dat").absolute(), Path("dist/data/iris-10-1tst.dat").absolute(),
             )
 
             print(classifier.name, classifier.parameters_overrides, accuracy_score(y_true, y_pred))
-        except RuntimeError as e:
+        except Exception as e:
+            failed.append(classifier.name)
             print(classifier.name, 'FAILED')
+
+    print('\n\n')
+    print(failed)
