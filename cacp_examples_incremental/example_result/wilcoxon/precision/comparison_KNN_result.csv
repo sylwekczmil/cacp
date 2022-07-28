@@ -1,0 +1,4 @@
+,KNN,Algorithm,p-value
+1,KNN,ARF,0.875
+2,KNN,GNB,0.625
+3,KNN,HAT,0.875

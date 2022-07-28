@@ -1,11 +1,13 @@
 import inspect
 import os
-import time
 import typing
 from pathlib import Path
+from timeit import default_timer as timer
 
 import pandas as pd
+import river
 from joblib import delayed, Parallel
+from river import metrics as river_metrics, stream, utils
 from tqdm import tqdm
 
 from cacp.dataset import ClassificationDatasetBase, ClassificationFoldData, AVAILABLE_N_FOLDS, \
@@ -13,6 +15,11 @@ from cacp.dataset import ClassificationDatasetBase, ClassificationFoldData, AVAI
 from cacp.util import accuracy, precision, recall, auc, f1
 
 DEFAULT_METRICS = (('AUC', auc), ('Accuracy', accuracy), ('Precision', precision), ('Recall', recall), ('F1', f1))
+
+DEFAULT_INCREMENTAL_METRICS = (
+    ('AUC', river_metrics.ROCAUC), ('Accuracy', river_metrics.Accuracy), ('Precision', river_metrics.Precision),
+    ('Recall', river_metrics.Recall), ('F1', river_metrics.F1)
+)
 
 
 def process_comparison_single(classifier_factory, classifier_name,
@@ -31,17 +38,17 @@ def process_comparison_single(classifier_factory, classifier_name,
     :return: dictionary of calculated metrics and metadata
 
     """
-    cls = classifier_factory(fold.x_train.shape[1], len(fold.labels))
-    train_start_time = time.time()
+    model = classifier_factory(fold.x_train.shape[1], len(fold.labels))
+    train_start_time = timer()
     labels = fold.labels
-    if 'classes' in inspect.getfullargspec(cls.fit).args:
-        cls.fit(fold.x_train, fold.y_train, classes=labels.tolist())
+    if 'classes' in inspect.getfullargspec(model.fit).args:
+        model.fit(fold.x_train, fold.y_train, classes=labels.tolist())
     else:
-        cls.fit(fold.x_train, fold.y_train)
-    train_time = (time.time() - train_start_time)
-    pred_start_time = time.time()
-    pred = cls.predict(fold.x_test)
-    pred_time = (time.time() - pred_start_time)
+        model.fit(fold.x_train, fold.y_train)
+    train_time = timer() - train_start_time
+    pred_start_time = timer()
+    pred = model.predict(fold.x_test)
+    pred_time = timer() - pred_start_time
 
     result = {
         'Dataset': dataset.name,
@@ -115,6 +122,163 @@ def process_comparison(
 
             df = pd.DataFrame(records)
             df = df.sort_values(by=['Dataset', 'Algorithm', 'CV index'])
+            count += 1
+            df.to_csv(result_dir.joinpath(f'comparison_{count}.csv'), index=False)
+            if count > 1:
+                prev_file = result_dir.joinpath(f'comparison_{count - 1}.csv')
+                if os.path.isfile(prev_file):
+                    os.remove(prev_file)
+
+    if df is not None:
+        prev_file = result_dir.joinpath(f'comparison_{count}.csv')
+        if os.path.isfile(prev_file):
+            os.remove(prev_file)
+        df.to_csv(result_dir.joinpath('comparison.csv'), index=False)
+
+
+def process_incremental_comparison_single(classifier_factory, classifier_name,
+                                          dataset: typing.Union[
+                                              ClassificationDatasetBase, river.datasets.base.Dataset
+                                          ], number_of_classes: int, incremental_comparison_dir: Path,
+                                          metrics: typing.Sequence[
+                                              typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS
+                                          ) -> dict:
+    """
+    Runs comparison on single classifier and dataset.
+
+    :param classifier_factory: classifier factory
+    :param classifier_name: classifier name
+    :param dataset: single dataset
+    :param number_of_classes: number of classes
+    :param incremental_comparison_dir: incremental single results directory
+    :param metrics: metrics collection
+    :return: dictionary of calculated metrics and metadata
+
+    """
+
+    incremental_comparison_classifier_dir = incremental_comparison_dir.joinpath(classifier_name)
+    incremental_comparison_classifier_dir.mkdir(exist_ok=True, parents=True)
+
+    train_time = 0
+    pred_time = 0
+
+    train_size = 0
+    dataset_name = "-"
+
+    dataset_type = type(dataset)
+    if issubclass(dataset_type, ClassificationDatasetBase):
+        dataset_name = dataset.name
+        train_size = dataset.instances
+    elif issubclass(dataset_type, river.datasets.base.Dataset):
+        dataset_name = dataset.__class__.__name__.lower()
+        train_size = dataset.n_samples
+
+    metric = river_metrics.base.Metrics([m() for _, m in metrics])
+
+    model = classifier_factory(train_size, number_of_classes)
+
+    # Determine if predict_one or predict_proba_one should be used in case of a classifier
+    if utils.inspect.isclassifier(model) and not metric.requires_labels:
+        pred_func = model.predict_proba_one
+    else:
+        pred_func = model.predict_one
+
+    records = []
+    y_pred = None
+
+    for i, x, y, *kwargs in stream.simulate_qa(dataset, None, None, copy=True):
+
+        kwargs = kwargs[0] if kwargs else {}
+
+        if y is None:
+            # no ground truth, just make a prediction
+            pred_start_time = timer()
+            # predict
+            y_pred = pred_func(x=x, **kwargs)
+            pred_time_diff = timer() - pred_start_time
+            pred_time += pred_time_diff
+        else:
+            # there's a ground truth, model and metric can be updated
+
+            # update the metrics
+            if y_pred != {} and y_pred is not None:
+                metric.update(y_true=y, y_pred=y_pred)
+                record = {
+                    'index': i,
+                    'y_true': y,
+                    'y_pred': max(y_pred, key=y_pred.get)
+                }
+                for metric_idx, (metric_name, _) in enumerate(metrics):
+                    record[metric_name] = metric.data[metric_idx].get()
+                records.append(record)
+
+            learn_one_start_time = timer()
+            # learn
+            model.learn_one(x=x, y=y, **kwargs)
+            learn_time_diff = timer() - learn_one_start_time
+            train_time += learn_time_diff
+
+    df = pd.DataFrame(records)
+    df.to_csv(incremental_comparison_classifier_dir.joinpath(f'{dataset_name}.csv'), index=False)
+
+    result = {
+        'Dataset': dataset_name,
+        'Algorithm': classifier_name,
+        'Number of classes': number_of_classes,
+        'Train size': train_size,
+        'Test size': train_size,
+        'Train time [s]': train_time,
+        'Prediction time [s]': pred_time
+    }
+
+    for metric_idx, (metric_name, _) in enumerate(metrics):
+        result[metric_name] = metric.data[metric_idx].get()
+
+    return result
+
+
+def process_incremental_comparison(
+    datasets: typing.List[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
+    classifiers: typing.List[typing.Tuple[str, typing.Callable]],
+    result_dir: Path,
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS
+):
+    """
+    Runs comparison for provided datasets and incremental classifiers.
+
+    :param datasets: dataset collection
+    :param classifiers: classifiers collection
+    :param result_dir: results directory
+    :param metrics: metrics collection
+
+    """
+
+    incremental_comparison_dir = result_dir.joinpath('incremental').joinpath('result')
+    incremental_comparison_dir.mkdir(exist_ok=True, parents=True)
+    count = 0
+    records = []
+    df = None
+
+    with tqdm(total=len(datasets), desc='Processing comparison', unit='dataset') as pbar:
+        for dataset_idx, dataset in enumerate(datasets):
+
+            # preload dataset to prevent race conditions on file savings and count classes
+            labels = set()
+            for x, y in dataset:
+                labels.add(y)
+            number_of_classes = len(labels)
+
+            rows = Parallel(n_jobs=len(classifiers))(
+                delayed(process_incremental_comparison_single)(c, c_n, dataset, number_of_classes,
+                                                               incremental_comparison_dir, metrics) for
+                c_n, c in
+                classifiers
+            )
+            records.extend(rows)
+            pbar.update(1)
+
+            df = pd.DataFrame(records)
+            df = df.sort_values(by=['Dataset', 'Algorithm'])
             count += 1
             df.to_csv(result_dir.joinpath(f'comparison_{count}.csv'), index=False)
             if count > 1:

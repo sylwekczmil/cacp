@@ -1,0 +1,4 @@
+,Algorithm,AUC p-value,Accuracy p-value,Precision p-value,Recall p-value,F1 p-value
+1,ARF,0.125,0.875,0.625,0.875,1.0
+2,HAT,0.625,1.0,0.28504940740261275,0.5929800980174267,1.0
+3,KNN,0.125,1.0,0.625,1.0,1.0

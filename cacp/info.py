@@ -3,12 +3,14 @@ import typing
 from pathlib import Path
 
 import pandas as pd
+import river.datasets.base
 
 from cacp.dataset import ClassificationDatasetBase
 from cacp.util import to_latex
 
 
-def dataset_info(datasets: typing.Iterable[ClassificationDatasetBase], result_dir: Path):
+def dataset_info(datasets: typing.Iterable[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
+                 result_dir: Path):
     """
     Produces results files with list of all datasets used in experiment alog with their attributes.
 
@@ -18,11 +20,21 @@ def dataset_info(datasets: typing.Iterable[ClassificationDatasetBase], result_di
     """
     records = []
     for dataset_idx, dataset in enumerate(datasets):
+        name = dataset.__class__.__name__.lower()
+        if hasattr(dataset, "name"):
+            name = dataset.name
+
+        i = 0
+        x = {}
+        labels = set()
+        for i, (x, y) in enumerate(dataset):
+            labels.add(y)
+
         row = {
-            'Dataset': dataset.name,
-            'Instances': dataset.instances,
-            'Features': dataset.features,
-            'Classes': dataset.classes,
+            'Dataset': name,
+            'Instances': i + 1,
+            'Features': len(x),
+            'Classes': len(labels),
         }
         records.append(row)
 
@@ -57,7 +69,9 @@ def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callab
         classifier_type = 'custom'
         if library == 'sklearn':
             classifier_type = 'offline'
-        if library == 'skmultiflow':
+        elif library == 'skmultiflow':
+            classifier_type = 'incremental'
+        elif library == 'river':
             classifier_type = 'incremental'
 
         row = {
