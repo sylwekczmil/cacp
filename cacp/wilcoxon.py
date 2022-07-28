@@ -56,7 +56,6 @@ def process_wilcoxon_for_metric(current_algorithm: str, metric: str, result_dir:
         row = {
             current_algorithm: current_algorithm,
             'Algorithm': algorithm,
-            # 'w': w,
             'p-value': p,
         }
         records.append(row)

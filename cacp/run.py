@@ -2,10 +2,12 @@ import os
 import typing
 from pathlib import Path
 
-from cacp.comparison import process_comparison
+import river.datasets.base
+
+from cacp.comparison import process_comparison, process_incremental_comparison
 from cacp.dataset import AVAILABLE_N_FOLDS, ClassificationDatasetBase, ClassificationFoldDataModifierBase
 from cacp.info import dataset_info, classifier_info
-from cacp.plot import process_comparison_results_plots
+from cacp.plot import process_comparison_results_plots, process_comparison_results_incremental_plots
 from cacp.result import process_comparison_results
 from cacp.time import process_times
 from cacp.util import seed_everything
@@ -56,6 +58,39 @@ def run_experiment(
     )
     process_comparison_results(result_dir)
     process_comparison_results_plots(result_dir)
+    process_comparison_result_winners(result_dir)
+    process_times(result_dir)
+    process_wilcoxon(classifiers, result_dir)
+
+
+def run_incremental_experiment(
+    datasets: typing.List[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
+    classifiers: typing.List[typing.Tuple[str, typing.Callable]],
+    results_directory: typing.Union[str, os.PathLike] = './result',
+    seed: int = 1
+):
+    """
+    [Main CACP Function] Runs automatic comparison of the performance evaluation of supervised classification
+    algorithms by evaluating metrics on multiple datasets.
+
+    :param datasets: dataset collection
+    :param classifiers: classifiers collection
+    :param results_directory: results directory
+    :param seed: random seed value
+
+    """
+    seed_everything(seed)
+    result_dir = Path(results_directory)
+    result_dir.mkdir(exist_ok=True, parents=True)
+
+    dataset_info(datasets, result_dir)
+    classifier_info(classifiers, result_dir)
+    process_incremental_comparison(
+        datasets, classifiers, result_dir
+    )
+    process_comparison_results(result_dir)
+    process_comparison_results_plots(result_dir)
+    process_comparison_results_incremental_plots(result_dir)
     process_comparison_result_winners(result_dir)
     process_times(result_dir)
     process_wilcoxon(classifiers, result_dir)

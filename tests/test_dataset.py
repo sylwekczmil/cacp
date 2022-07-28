@@ -69,3 +69,26 @@ def test_local_dataset():
     assert ds.features == 4
     assert ds.classes == 3
     assert ds.instances == 150
+
+
+def test_dataset_folds(datasets):
+    ds = datasets[0]
+    index = 0
+    for index, fold in enumerate(ds.folds(), 1):
+        assert fold.index == index
+        assert fold.x_train.shape == (135, 4)
+        assert fold.x_test.shape == (15, 4)
+        assert fold.y_train.shape == (135,)
+        assert fold.y_test.shape == (15,)
+    assert index == 10
+
+
+def test_dataset_iter(datasets):
+    ds = datasets[0]
+    index = 0
+    for index, (x, y) in enumerate(ds, 1):
+        assert np.issubdtype(type(y), np.integer)
+        assert type(x) == dict
+        assert len(x) == 4
+        assert list(x.keys()) == [0, 1, 2, 3]
+    assert index == 150

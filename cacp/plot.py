@@ -1,6 +1,10 @@
+import typing
+from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -34,3 +38,90 @@ def process_comparison_results_plots(result_dir: Path):
         boxplot_sorted(df_results, column=metric, by='algorithm', file_suffix='_per_fold')
         boxplot_sorted(df_results.groupby(['algorithm', 'dataset']).mean().reset_index(level=0),
                        column=metric, by='algorithm', file_suffix='_per_dataset')
+
+
+@dataclass
+class Line:
+    x: np.ndarray
+    y: np.ndarray
+    label: str = ''
+
+
+def _plot_incremental(file_name: str, y_label: str, lines: typing.List[Line], plot_dir: Path):
+    for line in lines:
+        plt.plot(line.x, line.y, label=line.label)
+    plt.xlabel('Number of samples')
+    plt.ylabel(y_label)
+    ax = plt.gca()
+    if len(lines) > 1:
+        ax.legend()
+    ax.set_ylim([-0.05, 1.05])
+    plt.savefig(plot_dir.joinpath(f'{file_name}.eps'))
+    plt.savefig(plot_dir.joinpath(f'{file_name}.png'))
+    plt.close()
+
+
+def process_comparison_results_single_incremental_plot(classifier_name: str, dataset_name: str, metric: str,
+                                                       df: pd.DataFrame, incremental_plot_dir: Path):
+    """
+    Generates plots from single incremental comparison results.
+
+    :param classifier_name: classifier name
+    :param dataset_name: dataset name
+    :param metric: metric name
+    :param df: result dataframe
+    :param incremental_plot_dir: output plot directory
+
+    """
+
+    incremental_classifier_single_plot_dir = incremental_plot_dir.joinpath('single').joinpath(classifier_name)
+    incremental_classifier_single_plot_dir.mkdir(exist_ok=True, parents=True)
+    line = Line(df['index'], df[metric.lower()])
+    _plot_incremental(
+        f"{classifier_name}_{dataset_name}_{metric.lower()}",
+        metric,
+        [line],
+        incremental_classifier_single_plot_dir
+    )
+
+
+def process_comparison_results_incremental_plots(result_dir: Path):
+    """
+    Generates plots from incremental comparison results.
+
+    :param result_dir: results directory
+
+    """
+    incremental_comparison_dir = result_dir.joinpath('incremental').joinpath('result')
+    incremental_plot_dir = result_dir.joinpath('incremental').joinpath('plot')
+    incremental_plot_dir.mkdir(exist_ok=True, parents=True)
+
+    dataset_dfs = defaultdict(list)
+    classifier_names = []
+    metrics = ["Accuracy", "Precision", "Recall", "F1", "AUC"]
+
+    for classifier_dir in incremental_comparison_dir.glob("*"):
+        classifier_name = classifier_dir.stem
+        classifier_names.append(classifier_name)
+        for classifier_dataset_file in classifier_dir.glob("*.csv"):
+            dataset_name = classifier_dataset_file.stem
+            df = pd.read_csv(classifier_dataset_file)
+            dataset_dfs[dataset_name].append(df)
+            for metric in metrics:
+                process_comparison_results_single_incremental_plot(
+                    classifier_name,
+                    dataset_name,
+                    metric,
+                    df,
+                    incremental_plot_dir
+                )
+
+    for dataset_name, dfs in dataset_dfs.items():
+        for metric in metrics:
+            lines = [Line(df['index'], df[metric.lower()], classifier_names[i]) for i, df in enumerate(dfs)]
+            _plot_incremental(
+                f"{dataset_name}_{metric.lower()}",
+                metric,
+                lines,
+                incremental_plot_dir
+            )
