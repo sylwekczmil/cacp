@@ -2,6 +2,10 @@ import shutil
 from pathlib import Path
 
 import pytest
+import river.datasets
+from river.ensemble import AdaptiveRandomForestClassifier
+from river.neighbors import KNNClassifier
+from river.tree import HoeffdingTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
@@ -30,6 +34,12 @@ def result_dir_with_data(result_dir, golden_result_dir) -> Path:
 
 
 @pytest.fixture()
+def result_dir_with_incremental_data(result_dir, golden_result_dir) -> Path:
+    shutil.copytree(golden_result_dir.joinpath('incremental'), result_dir.joinpath('incremental'))
+    return result_dir
+
+
+@pytest.fixture()
 def example_result_dir() -> Path:
     p = Path(__file__).parent.joinpath('example_results')
     p.mkdir(exist_ok=True, parents=True)
@@ -51,6 +61,24 @@ def classifiers():
         ('SVC', lambda n_inputs, n_classes: SVC()),
         ('DT', lambda n_inputs, n_classes: DecisionTreeClassifier(max_depth=5)),
         ('RF', lambda n_inputs, n_classes: RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)),
+    ]
+
+
+@pytest.fixture()
+def incremental_datasets():
+    return [
+        river.datasets.Phishing(),
+        ClassificationDataset('wisconsin', files_cache_path=files_cache_path),
+        ClassificationDataset('pima', files_cache_path=files_cache_path),
+    ]
+
+
+@pytest.fixture()
+def incremental_classifiers():
+    return [
+        ('ARF', lambda n_inputs, n_classes: AdaptiveRandomForestClassifier()),
+        ('HAT', lambda n_inputs, n_classes: HoeffdingTreeClassifier()),
+        ('KNN', lambda n_inputs, n_classes: KNNClassifier()),
     ]
 
 

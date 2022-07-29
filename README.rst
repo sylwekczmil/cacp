@@ -18,6 +18,12 @@ CACP: Classification Algorithms Comparison Pipeline
 * Documentation: https://cacp.readthedocs.io.
 * Article: https://doi.org/10.1016/j.softx.2022.101134
 
+
+Description
+-------------
+
+CACP is made for comparing newly developed classification algorithms (both traditional and incremental) in Python with other commonly used classifiers to evaluate classification performance, reproducibility, and statistical reliability. CACP simplifies the entire classifier evaluation process.
+
 Installation
 --------------
 
@@ -130,3 +136,46 @@ https://github.com/sylwekczmil/cacp/tree/main/cacp_examples/example_custom_datas
 
 Defining local dataset:
 https://github.com/sylwekczmil/cacp/tree/main/cacp_examples/example_custom_datasets/local_dataset.py
+
+
+Incremental Algorithms Usage
+-----------------------------
+An example usage of this library for incremental classifiers is included in the package:
+https://github.com/sylwekczmil/cacp/tree/main/cacp_examples_incremental.
+
+.. code:: python3
+
+    import river
+    from river.ensemble import AdaptiveRandomForestClassifier
+    from river.naive_bayes import GaussianNB
+    from river.neighbors import KNNClassifier
+    from river.tree import HoeffdingTreeClassifier
+
+    from cacp import run_incremental_experiment, ClassificationDataset
+
+    if __name__ == '__main__':
+        # select datasets
+        experimental_datasets = [
+            ClassificationDataset('iris'),
+            ClassificationDataset('wisconsin'),
+            # you can use datasets from river
+            river.datasets.Phishing(),
+            river.datasets.Bananas(),
+
+        ]
+
+        # select incremental classifiers
+        experimental_classifiers = [
+            ('ARF', lambda n_inputs, n_classes: AdaptiveRandomForestClassifier()),
+            ('HAT', lambda n_inputs, n_classes: HoeffdingTreeClassifier()),
+            ('KNN', lambda n_inputs, n_classes: KNNClassifier()),
+            ('GNB', lambda n_inputs, n_classes: GaussianNB()),
+        ]
+
+        # trigger experiment run
+        run_incremental_experiment(
+            experimental_datasets,
+            experimental_classifiers,
+            results_directory='./example_result'
+        )
+

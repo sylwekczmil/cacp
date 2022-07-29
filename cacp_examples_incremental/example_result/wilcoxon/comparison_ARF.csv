@@ -1,0 +1,4 @@
+,Algorithm,accuracy p-value,auc p-value
+1,GNB,0.625,0.125
+2,HAT,0.625,0.25
+3,KNN,0.10880943004054568,0.375

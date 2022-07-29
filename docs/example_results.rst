@@ -50,3 +50,12 @@ Info Tables
 
 .. image:: ./images/info_tables.png
    :width: 500 px
+
+
+Incremental Algorithms Comparison
+----------------------------------
+
+Comparison for Phishing dataset on 4 incremental learning algorithms from River library:
+
+.. image:: ./images/phishing_accuracy.png
+   :width: 500 px

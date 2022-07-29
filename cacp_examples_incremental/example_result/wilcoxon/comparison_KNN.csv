@@ -1,0 +1,4 @@
+,Algorithm,accuracy p-value,auc p-value
+1,ARF,0.10880943004054568,0.375
+2,GNB,1.0,0.125
+3,HAT,0.875,0.125

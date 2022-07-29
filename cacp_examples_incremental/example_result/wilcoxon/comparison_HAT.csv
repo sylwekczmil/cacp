@@ -1,0 +1,4 @@
+,Algorithm,accuracy p-value,auc p-value
+1,ARF,0.625,0.25
+2,GNB,1.0,0.625
+3,KNN,0.875,0.125
