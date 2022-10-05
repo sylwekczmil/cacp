@@ -6,17 +6,20 @@ from pathlib import Path
 
 import pandas as pd
 from joblib import delayed, Parallel
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tqdm import tqdm
 
 from cacp.dataset import ClassificationDatasetBase, ClassificationFoldData, AVAILABLE_N_FOLDS, \
     ClassificationFoldDataModifierBase, ClassificationFoldDataNormalizer
-from cacp.util import auc_score
+from cacp.util import accuracy, precision, recall, auc, f1
+
+DEFAULT_METRICS = (('AUC', auc), ('Accuracy', accuracy), ('Precision', precision), ('Recall', recall), ('F1', f1))
 
 
 def process_comparison_single(classifier_factory, classifier_name,
                               dataset: ClassificationDatasetBase,
-                              fold: ClassificationFoldData) -> dict:
+                              fold: ClassificationFoldData,
+                              metrics: typing.Sequence[typing.Tuple[str, typing.Callable]],
+                              ) -> dict:
     """
     Runs comparison on single classifier and dataset.
 
@@ -24,6 +27,7 @@ def process_comparison_single(classifier_factory, classifier_name,
     :param classifier_name: classifier name
     :param dataset: single dataset
     :param fold: fold data
+    :param metrics: metrics collection
     :return: dictionary of calculated metrics and metadata
 
     """
@@ -39,27 +43,28 @@ def process_comparison_single(classifier_factory, classifier_name,
     pred = cls.predict(fold.x_test)
     pred_time = (time.time() - pred_start_time)
 
-    return {
-        'dataset': dataset.name,
-        'algorithm': classifier_name,
-        'number_of_classes': len(set(fold.y_train)),
-        'train_size': len(fold.x_train),
-        'test_size': len(fold.x_test),
-        'cv_idx': fold.index,
-        'accuracy': accuracy_score(fold.y_test, pred),
-        'precision': precision_score(fold.y_test, pred, average='weighted', labels=labels, zero_division=0),
-        'recall': recall_score(fold.y_test, pred, average='weighted', labels=labels, zero_division=0),
-        'f1': f1_score(fold.y_test, pred, average='weighted', labels=labels, zero_division=0),
-        'auc': auc_score(fold.y_test, pred, average='weighted', multi_class='ovo', labels=labels),
-        'train_time': train_time,
-        'pred_time': pred_time
+    result = {
+        'Dataset': dataset.name,
+        'Algorithm': classifier_name,
+        'Number of classes': len(set(fold.y_train)),
+        'Train size': len(fold.x_train),
+        'Test size': len(fold.x_test),
+        'CV index': fold.index,
+        'Train time [s]': train_time,
+        'Prediction time [s]': pred_time
     }
+
+    for (metric, metric_fun) in metrics:
+        result[metric] = metric_fun(fold.y_test, pred, labels)
+
+    return result
 
 
 def process_comparison(
     datasets: typing.List[ClassificationDatasetBase],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],
     result_dir: Path,
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_METRICS,
     n_folds: AVAILABLE_N_FOLDS = 10,
     custom_fold_modifiers: typing.List[ClassificationFoldDataModifierBase] = None,
     dob_scv: bool = True,
@@ -72,6 +77,7 @@ def process_comparison(
     :param datasets: dataset collection
     :param classifiers: classifiers collection
     :param result_dir: results directory
+    :param metrics: metrics collection
     :param n_folds: number of folds {5,10}
     :param custom_fold_modifiers: custom fold modifiers that can change fold data before usage
     :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
@@ -101,13 +107,14 @@ def process_comparison(
                     modified_fold = fold_modifier.modify(modified_fold)
 
                 rows = Parallel(n_jobs=len(classifiers))(
-                    delayed(process_comparison_single)(c, c_n, dataset, modified_fold) for c_n, c in classifiers
+                    delayed(process_comparison_single)(c, c_n, dataset, modified_fold, metrics) for c_n, c in
+                    classifiers
                 )
                 records.extend(rows)
                 pbar.update(1)
 
             df = pd.DataFrame(records)
-            df = df.sort_values(by=['dataset', 'algorithm', 'cv_idx'])
+            df = df.sort_values(by=['Dataset', 'Algorithm', 'CV index'])
             count += 1
             df.to_csv(result_dir.joinpath(f'comparison_{count}.csv'), index=False)
             if count > 1:

@@ -1,14 +1,19 @@
+import typing
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from cacp.comparison import DEFAULT_METRICS
 
-def process_comparison_results_plots(result_dir: Path):
+
+def process_comparison_results_plots(result_dir: Path,
+                                     metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_METRICS):
     """
     Generates plots from comparison results.
 
     :param result_dir: results directory
+    :param metrics: metrics collection
 
     """
     df_results = pd.read_csv(result_dir.joinpath('comparison.csv'))
@@ -21,16 +26,15 @@ def process_comparison_results_plots(result_dir: Path):
         df2[meds.index].boxplot(return_type="axes")
         plt.title('')
         plt.suptitle('')
-        y_label = 'AUC' if metric == 'auc' else metric.capitalize()
-        plt.ylabel(y_label)
+        plt.ylabel(column)
         plt.xlabel('Algorithm')
         plt.xticks(rotation=90)
         plt.tight_layout()
-        plt.savefig(plot_dir.joinpath(f'comparison_{metric}{file_suffix}.eps'))
-        plt.savefig(plot_dir.joinpath(f'comparison_{metric}{file_suffix}.png'))
+        plt.savefig(plot_dir.joinpath(f'comparison_{column.lower()}{file_suffix}.eps'))
+        plt.savefig(plot_dir.joinpath(f'comparison_{column.lower()}{file_suffix}.png'))
         plt.close()
 
-    for metric in ['auc', 'accuracy', 'precision', 'recall', 'f1']:
-        boxplot_sorted(df_results, column=metric, by='algorithm', file_suffix='_per_fold')
-        boxplot_sorted(df_results.groupby(['algorithm', 'dataset']).mean().reset_index(level=0),
-                       column=metric, by='algorithm', file_suffix='_per_dataset')
+    for metric, _ in metrics:
+        boxplot_sorted(df_results, column=metric, by='Algorithm', file_suffix='_per_fold')
+        boxplot_sorted(df_results.groupby(['Algorithm', 'Dataset']).mean().reset_index(level=0),
+                       column=metric, by='Algorithm', file_suffix='_per_dataset')

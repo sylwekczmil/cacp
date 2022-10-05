@@ -2,18 +2,18 @@
 \footnotesize
 \caption{Comparison of classifiers and KNN using Wilcoxon signed-rank test}
 \label{tab:wilcoxon comparison}
-\begin{tabular}{llll}
+\begin{tabular}{lllllll}
 \hline
- & Algorithm & ACC p-value & AUC p-value \\
+ & Algorithm & AUC p-value & Accuracy p-value & Precision p-value & Recall p-value & F1 p-value \\
 \hline
-1 & AB & 0.0002 & \textbf{0.1149} \\
-2 & DT & 0.0411 & \textbf{0.8249} \\
-3 & GNB & 0.0000 & 0.0027 \\
-4 & MLP & 0.0000 & 0.0003 \\
-5 & NC & 0.0000 & 0.0000 \\
-6 & RF & \textbf{0.7127} & 0.0000 \\
-7 & SVC & \textbf{0.0821} & 0.0000 \\
-8 & XGB & 0.0000 & 0.0000 \\
+1 & AB & \textbf{0.1219} & 0.0002 & 0.0000 & 0.0002 & 0.0000 \\
+2 & DT & \textbf{0.5924} & 0.0298 & 0.0267 & 0.0298 & 0.0225 \\
+3 & GNB & 0.0027 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+4 & MLP & 0.0004 & 0.0000 & 0.0012 & 0.0000 & 0.0002 \\
+5 & NC & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+6 & RF & 0.0000 & \textbf{0.6882} & 0.0150 & \textbf{0.6882} & 0.0007 \\
+7 & SVC & 0.0000 & \textbf{0.0821} & 0.0002 & \textbf{0.0821} & 0.0001 \\
+8 & XGB & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
 \hline
 \end{tabular}
 \end{table}

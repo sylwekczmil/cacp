@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
+from cacp.comparison import DEFAULT_METRICS
 from cacp.util import to_latex
 
 
@@ -36,16 +37,16 @@ def process_wilcoxon_for_metric(current_algorithm: str, metric: str, result_dir:
     """
     wilcoxon_dir = result_dir.joinpath('wilcoxon')
     wilcoxon_dir.mkdir(exist_ok=True, parents=True)
-    metric_dir = wilcoxon_dir.joinpath(metric)
+    metric_dir = wilcoxon_dir.joinpath(metric.lower())
     metric_dir.mkdir(exist_ok=True, parents=True)
 
     records = []
     df = pd.read_csv(result_dir.joinpath('comparison.csv'))
-    algorithms = list(df.algorithm.unique())
+    algorithms = list(df['Algorithm'].unique())
     algorithms.remove(current_algorithm)
-    current_alg_df = df[df.algorithm == current_algorithm]
+    current_alg_df = df[df['Algorithm'] == current_algorithm]
     for algorithm in algorithms:
-        a_df = df[df.algorithm == algorithm]
+        a_df = df[df['Algorithm'] == algorithm]
         alg1_values = current_alg_df[metric].values
         alg2_values = a_df[metric].values
         diff = alg1_values - alg2_values
@@ -56,7 +57,6 @@ def process_wilcoxon_for_metric(current_algorithm: str, metric: str, result_dir:
         row = {
             current_algorithm: current_algorithm,
             'Algorithm': algorithm,
-            # 'w': w,
             'p-value': p,
         }
         records.append(row)
@@ -76,28 +76,28 @@ def process_wilcoxon_for_metric(current_algorithm: str, metric: str, result_dir:
     return df_r
 
 
-def process_wilcoxon(classifiers: typing.List[typing.Tuple[str, typing.Callable]], result_dir: Path):
+def process_wilcoxon(classifiers: typing.List[typing.Tuple[str, typing.Callable]], result_dir: Path,
+                     metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_METRICS):
     """
     Calculates the Wilcoxon signed-rank test for comparison results.
 
     :param classifiers: classifiers collection
     :param result_dir: results directory
+    :param metrics: metrics collection
 
     """
     for current_algorithm, _ in classifiers:
         with warnings.catch_warnings():
             warnings.simplefilter(action='ignore', category=UserWarning)
-            acc_df = process_wilcoxon_for_metric(current_algorithm, 'accuracy', result_dir).sort_values(
-                by=['Algorithm'])
-            auc_df = process_wilcoxon_for_metric(current_algorithm, 'auc', result_dir).sort_values(by=['Algorithm'])
+            r_df = None
+            for metric, _ in metrics:
+                metric_wilcoxon = process_wilcoxon_for_metric(current_algorithm, metric, result_dir).sort_values(
+                    by=['Algorithm'])
+                if r_df is None:
+                    r_df = metric_wilcoxon[['Algorithm']].copy()
 
-            r_df = acc_df[['Algorithm']].copy()
-
-            for c in acc_df.columns[2:]:
-                r_df['accuracy ' + c] = acc_df[c].values
-
-            for c in auc_df.columns[2:]:
-                r_df['auc ' + c] = auc_df[c].values
+                for c in metric_wilcoxon.columns[2:]:
+                    r_df[f'{metric} {c}'] = metric_wilcoxon[c].values
 
             wilcoxon_dir = result_dir.joinpath('wilcoxon')
             wilcoxon_dir.mkdir(exist_ok=True, parents=True)
@@ -106,7 +106,8 @@ def process_wilcoxon(classifiers: typing.List[typing.Tuple[str, typing.Callable]
             r_df.index += 1
             r_df.to_csv(wilcoxon_dir.joinpath(f'comparison_{current_algorithm}.csv'), index=True)
 
-            for col in ['accuracy p-value', 'auc p-value']:
+            for metric, _ in metrics:
+                col = f'{metric} p-value'
                 r_df[col] = r_df[col].apply(lambda data: bold_large_p_value(data))
 
             wilcoxon_dir.joinpath(f'comparison_{current_algorithm}.tex').open('w').write(
