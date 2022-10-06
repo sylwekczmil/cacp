@@ -2,13 +2,13 @@
 \footnotesize
 \caption{Comparison of classifiers and SVC using Wilcoxon signed-rank test}
 \label{tab:wilcoxon comparison}
-\begin{tabular}{llll}
+\begin{tabular}{lllllll}
 \hline
- & Algorithm & ACC p-value & AUC p-value \\
+ & Algorithm & AUC p-value & Accuracy p-value & Precision p-value & Recall p-value & F1 p-value \\
 \hline
-1 & DT & \textbf{0.2692} & \textbf{0.9093} \\
-2 & KNN & 0.0475 & \textbf{0.6652} \\
-3 & RF & \textbf{0.5804} & \textbf{0.8541} \\
+1 & DT & \textbf{0.5999} & \textbf{0.4859} & \textbf{0.3185} & \textbf{0.4859} & \textbf{0.8290} \\
+2 & KNN & \textbf{0.6652} & 0.0475 & 0.0342 & 0.0475 & \textbf{0.1328} \\
+3 & RF & \textbf{0.9397} & \textbf{0.9191} & \textbf{0.7869} & \textbf{0.9191} & \textbf{0.9225} \\
 \hline
 \end{tabular}
 \end{table}

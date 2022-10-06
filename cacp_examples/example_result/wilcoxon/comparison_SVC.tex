@@ -2,18 +2,18 @@
 \footnotesize
 \caption{Comparison of classifiers and SVC using Wilcoxon signed-rank test}
 \label{tab:wilcoxon comparison}
-\begin{tabular}{llll}
+\begin{tabular}{lllllll}
 \hline
- & Algorithm & ACC p-value & AUC p-value \\
+ & Algorithm & AUC p-value & Accuracy p-value & Precision p-value & Recall p-value & F1 p-value \\
 \hline
-1 & AB & 0.0000 & \textbf{0.7400} \\
-2 & DT & 0.0000 & \textbf{0.0698} \\
-3 & GNB & 0.0000 & \textbf{0.2345} \\
-4 & KNN & \textbf{0.0821} & 0.0000 \\
-5 & MLP & 0.0008 & 0.0000 \\
-6 & NC & 0.0000 & 0.0000 \\
-7 & RF & \textbf{0.2209} & \textbf{0.6607} \\
-8 & XGB & 0.0000 & 0.0000 \\
+1 & AB & \textbf{0.7222} & 0.0000 & 0.0074 & 0.0000 & 0.0021 \\
+2 & DT & \textbf{0.1177} & 0.0000 & \textbf{0.7533} & 0.0000 & \textbf{0.4259} \\
+3 & GNB & \textbf{0.2345} & 0.0000 & \textbf{0.3344} & 0.0000 & 0.0000 \\
+4 & KNN & 0.0000 & \textbf{0.0821} & 0.0002 & \textbf{0.0821} & 0.0001 \\
+5 & MLP & 0.0000 & 0.0001 & 0.0000 & 0.0001 & 0.0000 \\
+6 & NC & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+7 & RF & \textbf{0.8226} & \textbf{0.1885} & \textbf{0.2895} & \textbf{0.1885} & \textbf{0.7505} \\
+8 & XGB & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
 \hline
 \end{tabular}
 \end{table}

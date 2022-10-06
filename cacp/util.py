@@ -3,7 +3,7 @@ import random
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 
 
 def seed_everything(seed=1):
@@ -56,9 +56,26 @@ def to_latex(df: pd.DataFrame, **kwargs) -> str:
 
     # this fixes difference between python 3.7 and later versions
     lines[6] = lines[6].replace('{', '').replace('}', '')
+    return '\n'.join(lines)
 
-    tex = '\n'.join(lines)
 
-    tex = tex.replace(' accuracy ', ' ACC ').replace(' auc ', ' AUC ').replace(' algorithm ', ' Algorithm ') \
-        .replace(' precision ', ' Pre ').replace(' recall ', ' Sen ').replace(' f1 ', ' F1 ')
-    return tex
+def accuracy(y_true, y_pred, labels):
+    return accuracy_score(y_true, y_pred)
+
+
+def precision(y_true, y_pred, labels):
+    return precision_score(y_true, y_pred, average='weighted', labels=labels,
+                           zero_division=0)
+
+
+def recall(y_true, y_pred, labels):
+    return recall_score(y_true, y_pred, average='weighted', labels=labels,
+                        zero_division=0)
+
+
+def f1(y_true, y_pred, labels):
+    return f1_score(y_true, y_pred, average='weighted', labels=labels, zero_division=0)
+
+
+def auc(y_true, y_pred, labels):
+    return auc_score(y_true, y_pred, average='weighted', multi_class='ovo', labels=labels)

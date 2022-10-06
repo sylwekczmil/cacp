@@ -1,3 +1,4 @@
+from cacp.comparison import DEFAULT_METRICS
 from cacp.plot import process_comparison_results_plots
 
 
@@ -8,5 +9,5 @@ def test_plot(result_dir_with_data):
 
     for extension in ['eps', 'png']:
         for kind in ['dataset', 'fold']:
-            for metric in ['auc', 'accuracy', 'precision', 'recall', 'f1']:
-                assert plot_dir.joinpath(f'comparison_{metric}_per_{kind}.{extension}').exists()
+            for metric, _ in DEFAULT_METRICS:
+                assert plot_dir.joinpath(f'comparison_{metric.lower()}_per_{kind}.{extension}').exists()
