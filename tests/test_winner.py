@@ -13,7 +13,7 @@ def test_comparison_results(result_dir_with_data, golden_result_dir):
     assert result_winner_dir.joinpath('comparison.tex').open().read() == expected_winner_dir.joinpath(
         'comparison.tex').open().read()
 
-    for metric in ['accuracy', 'auc']:
+    for metric in ['accuracy', 'auc', 'f1', 'precision', 'recall']:
         assert result_winner_dir.joinpath(metric).joinpath(
             'comparison_result.csv').open().read() == expected_winner_dir.joinpath(metric).joinpath(
             'comparison_result.csv').open().read()

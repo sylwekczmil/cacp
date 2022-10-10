@@ -85,6 +85,12 @@ class ClassificationDatasetBase(ABC):
     ) -> typing.Iterable[ClassificationFoldData]:
         pass
 
+    def __iter__(self):
+        for fold in self.folds():
+            for x_data, y in zip(fold.x_test, fold.y_test):
+                x = {i: value for i, value in enumerate(x_data)}
+                yield x, y
+
     @property
     @abstractmethod
     def name(self) -> str:

@@ -5,7 +5,7 @@ from cacp.dataset import \
     ClassificationFoldData, \
     all_datasets
 
-from cacp.run import run_experiment
+from cacp.run import run_experiment, run_incremental_experiment
 
 __all__ = [
     'ClassificationDatasetBase',
@@ -13,5 +13,6 @@ __all__ = [
     'LocalClassificationDataset',
     'ClassificationFoldData',
     'all_datasets',
-    'run_experiment'
+    'run_experiment',
+    'run_incremental_experiment'
 ]
