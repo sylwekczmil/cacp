@@ -92,3 +92,25 @@ def test_dataset_iter(datasets):
         assert len(x) == 4
         assert list(x.keys()) == [0, 1, 2, 3]
     assert index == 150
+
+
+def test_dataset_iter_seed(datasets):
+    ds = datasets[0]
+    ds.seed = 1
+
+    y_array_1 = []
+    for (x, y) in ds:
+        y_array_1.append(y)
+
+    y_array_2 = []
+    for (x, y) in ds:
+        y_array_2.append(y)
+
+    assert y_array_1 == y_array_2
+
+    ds.seed = 2
+    y_array_3 = []
+    for (x, y) in ds:
+        y_array_3.append(y)
+
+    assert y_array_1 != y_array_3

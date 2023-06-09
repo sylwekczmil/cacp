@@ -75,6 +75,9 @@ class ClassificationDatasetBase(ABC):
     Base class for classification dataset that represents single dataset.
     """
 
+    def __init__(self, seed=1):
+        self.seed = seed
+
     @abstractmethod
     def folds(
         self,
@@ -85,8 +88,12 @@ class ClassificationDatasetBase(ABC):
         pass
 
     def __iter__(self):
+        random_state = np.random.RandomState(seed=self.seed)
         for fold in self.folds():
-            for x_data, y in zip(fold.x_test, fold.y_test):
+            idx = random_state.permutation(np.arange(len(fold.x_test)))
+            x_test = fold.x_test[idx]
+            y_test = fold.y_test[idx]
+            for x_data, y in zip(x_test, y_test):
                 x = {i: value for i, value in enumerate(x_data)}
                 yield x, y
 
@@ -134,16 +141,19 @@ class ClassificationDataset(ClassificationDatasetBase):
     Class that represents KEEL single dataset.
     """
 
-    def __init__(self,
-                 name: AVAILABLE_CLASSIFICATION_DATASET_NAMES,
-                 files_cache_path=Path.home().joinpath('cacp_files')
-                 ):
+    def __init__(
+        self, name: AVAILABLE_CLASSIFICATION_DATASET_NAMES,
+        files_cache_path=Path.home().joinpath('cacp_files'),
+        seed=1,
+    ):
         """
         Initializes class instance that represents KEEL single dataset.
 
         :param name: KEEL dataset name
         :param files_cache_path: optional cache file patch where dataset will be downloaded
         """
+
+        super().__init__(seed)
 
         self._name = name
 
