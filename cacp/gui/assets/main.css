@@ -1,0 +1,8 @@
+.rxjs-submit {
+    margin-top: 30px;
+    float: right !important;
+}
+
+.rjsf > .border-danger {
+    display: none !important;
+}

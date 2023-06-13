@@ -8,7 +8,7 @@ layout = html.Div([
     html.Div('This is experiments page'),
     html.Div([
         dbc.Button(
-            "Run new experiment", className="me-2", href="/experiment-new"
+            "Run new experiment", className="me-2", href="/new-experiment"
         )
     ], className="d-flex justify-content-end align-items-center"),
 ])

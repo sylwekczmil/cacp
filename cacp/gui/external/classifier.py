@@ -4,7 +4,7 @@ from cacp.gui.external.sklearn_library.classifier import SklearnClassifierModel
 
 def map_classifiers(classifiers: list):
     return [
-        {"#": i + 1, "docs_url": f"[{c.docs_url}]({c.docs_url})", **c.dict()} for
+        {"#": i + 1, "docs_url": f"[{c.docs_url}]({c.docs_url})", "json_schema": c.json_schema, **c.dict()} for
         i, c in
         enumerate(sorted(classifiers, key=lambda c: c.name))
     ]

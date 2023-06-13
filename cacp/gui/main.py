@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import flask
 from dash import Dash, html, page_container
 
-from cacp.gui.components.sidebar import sidebar_component
+from cacp.gui.components.shared.sidebar import sidebar_component
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO, dbc.icons.BOOTSTRAP], use_pages=True)
 
