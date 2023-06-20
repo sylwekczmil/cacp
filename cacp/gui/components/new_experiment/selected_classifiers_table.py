@@ -47,8 +47,7 @@ class SelectedClassifiersTable(html.Div):
                 defaultColDef={"maxWidth": 160, "sortable": True, "filter": True},
                 columnSize="responsiveSizeToFit",
             ),
-            Store(id=store_id),
-            html.Div(id="OUT")
+            Store(id=store_id)
         ])
 
         @callback(

@@ -60,6 +60,11 @@ class NewExperimentForm(html.Div):
             "subcomponent": "selected-classifiers",
             "aio_id": aio_id
         }
+        run_experiment_button = lambda aio_id: {
+            "component": "NewExperimentForm",
+            "subcomponent": "run-experiment-button",
+            "aio_id": aio_id
+        }
 
     ids = ids
 
@@ -136,7 +141,7 @@ class NewExperimentForm(html.Div):
                 selected_classifiers_table,
                 html.Div([
                     dbc.Button(
-                        "Run experiment", id="run-experiment-button", className="mt-3", n_clicks=0
+                        "Run experiment", id=self.ids.run_experiment_button(aio_id), className="mt-3", n_clicks=0
                     )
                 ], className="d-flex justify-content-end align-items-center"),
             ])
@@ -218,3 +223,14 @@ class NewExperimentForm(html.Div):
                 del prev_data[cell_renderer_data["rowIndex"]]
                 return prev_data
             return []
+
+        @callback(
+            Output(self.ids.run_experiment_button(aio_id), "children"),
+            Input(self.ids.run_experiment_button(aio_id), 'n_clicks'),
+            State(self.ids.selected_datasets_store(aio_id), "data"),
+            State(self.ids.selected_classifiers_store(aio_id), "data"),
+        )
+        def run_experiment_button(n_clicks, selected_datasets, selected_classifiers):
+            if n_clicks:
+                print("n_clicks", n_clicks, selected_datasets, selected_classifiers)
+            return "Run experiment"

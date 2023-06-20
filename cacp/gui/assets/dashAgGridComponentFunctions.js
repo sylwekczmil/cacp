@@ -12,10 +12,7 @@ dashAgGridComponentFunctions.Button = function (props) {
         'i',
         {
             onClick: onClick,
-            className: "bi bi-trash text-danger",
-            style: {
-                cursor: "pointer"
-            }
+            className: "bi bi-trash delete-button",
         },
         ''
     );

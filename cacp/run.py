@@ -64,8 +64,6 @@ def run_experiment(
     process_wilcoxon(classifiers, result_dir, metrics)
 
 
-#
-
 def run_incremental_experiment(
     datasets: typing.List[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],

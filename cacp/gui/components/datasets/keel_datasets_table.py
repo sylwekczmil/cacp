@@ -5,7 +5,9 @@ import pandas as pd
 from dash import html, callback, Input, Output
 from dash.dcc import Store
 
+from cacp import ClassificationDataset
 from cacp.gui.assets import ASSETS_PATH
+from cacp.gui.external.shared.type import class_to_id
 
 
 class KeelDatasetsTable(html.Div):
@@ -34,7 +36,8 @@ class KeelDatasetsTable(html.Div):
                      "type": "object",
                      "properties": {
                      }
-                 }
+                 },
+                 "id": class_to_id(ClassificationDataset)
                  } for r in pd.read_csv(ASSETS_PATH.joinpath("datasets.csv")).to_dict("records")
             ]
         ]

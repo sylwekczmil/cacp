@@ -5,6 +5,8 @@ import dash_rjsf
 from dash import html, Output, Input, callback, State, ctx, no_update
 from dash.dcc import Store
 
+SUBMIT_BUTTON_OPTIONS_NAME = "ui:submitButtonOptions"
+
 
 class SelectionModal(html.Span):
     class ids:
@@ -78,7 +80,7 @@ class SelectionModal(html.Span):
                             id=self.ids.rjsf(self.aio_id),
                             schema={
                             },
-                            uiSchema={"ui:submitButtonOptions": {
+                            uiSchema={SUBMIT_BUTTON_OPTIONS_NAME: {
                                 "submitText": "Submit",
                                 "norender": False,
                                 "props": {
@@ -109,7 +111,7 @@ class SelectionModal(html.Span):
                     schema['title'] = "Provide parameters for " + schema['title']
                 else:
                     schema['title'] = ""
-                return schema, {"ui:submitButtonOptions": {
+                return schema, {SUBMIT_BUTTON_OPTIONS_NAME: {
                     "submitText": "Submit",
                     "norender": False,
                     "props": {
@@ -117,7 +119,7 @@ class SelectionModal(html.Span):
                         "className": "rxjs-submit"
                     }
                 }}
-            return {}, {"ui:submitButtonOptions": {
+            return {}, {SUBMIT_BUTTON_OPTIONS_NAME: {
                 "submitText": "Submit",
                 "norender": False,
                 "props": {
