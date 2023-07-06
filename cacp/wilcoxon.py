@@ -91,8 +91,10 @@ def process_wilcoxon(classifiers: typing.List[typing.Tuple[str, typing.Callable]
             warnings.simplefilter(action='ignore', category=UserWarning)
             r_df = None
             for metric, _ in metrics:
-                metric_wilcoxon = process_wilcoxon_for_metric(current_algorithm, metric, result_dir).sort_values(
-                    by=['Algorithm'])
+                metric_wilcoxon = process_wilcoxon_for_metric(current_algorithm, metric, result_dir)
+                if metric_wilcoxon.empty:
+                    continue
+                metric_wilcoxon = metric_wilcoxon.sort_values(by=['Algorithm'])
                 if r_df is None:
                     r_df = metric_wilcoxon[['Algorithm']].copy()
 
@@ -101,6 +103,9 @@ def process_wilcoxon(classifiers: typing.List[typing.Tuple[str, typing.Callable]
 
             wilcoxon_dir = result_dir.joinpath('wilcoxon')
             wilcoxon_dir.mkdir(exist_ok=True, parents=True)
+
+            if r_df is None:
+                return
 
             r_df.reset_index(drop=True, inplace=True)
             r_df.index += 1

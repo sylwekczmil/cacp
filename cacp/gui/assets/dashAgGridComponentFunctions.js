@@ -1,19 +1,19 @@
 var dashAgGridComponentFunctions = (window.dashAgGridComponentFunctions = window.dashAgGridComponentFunctions || {});
 
 dashAgGridComponentFunctions.Button = function (props) {
-    const {setData, data} = props;
-    console.log('xxx', props, data)
+    const {setData, buttonName, buttonClassName, iconClassName} = props;
 
     function onClick() {
         setData();
     }
 
     return React.createElement(
-        'i',
+        "button",
         {
             onClick: onClick,
-            className: "bi bi-trash delete-button",
+            className: buttonClassName
         },
-        ''
+        buttonName, " ", React.createElement("i", {className: iconClassName}, "")
     );
+
 };

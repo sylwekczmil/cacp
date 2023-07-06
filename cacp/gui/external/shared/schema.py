@@ -4,6 +4,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from functools import lru_cache, cached_property
 from inspect import signature, Parameter, isabstract
+from pydoc import locate
 from typing import (
     Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union, get_args
 )
@@ -89,17 +90,17 @@ class SearchableToPydanticMapper(ToPydanticMapper):
     @staticmethod
     @lru_cache
     def _searchable_type_to_pseudo_pydantic_model(searchable, annotation):
-        model = new_pseudo_pydantic_model(f'{searchable.__name__}__{uuid.uuid4().hex}')
+        model = new_pseudo_pydantic_model(f"{searchable.__name__}__{uuid.uuid4().hex}")
         subclasses = get_all_non_abstract_subclasses(annotation)
         if not subclasses:
             subclasses.append(annotation)
         pseudo_subclasses = [
-            new_pseudo_pydantic_model(f'{class_to_id(x)}__{uuid.uuid4().hex}') for x in
+            new_pseudo_pydantic_model(f"{class_to_id(x)}__{uuid.uuid4().hex}") for x in
             subclasses
         ]
         p_annotation = Union[tuple(pseudo_subclasses)]
-        model.__fields__['option'] = ModelField.infer(
-            name='option',
+        model.__fields__["option"] = ModelField.infer(
+            name="option",
             value=None,
             annotation=p_annotation,
             class_validators=None,
@@ -186,6 +187,28 @@ class AnyToPydanticMapper(ToPydanticMapper):
         )
 
 
+@dataclass
+class DocToPydanticMapper:
+
+    @classmethod
+    def map(cls, class_type, parameter) -> ModelField:
+        doc_string = class_type.__doc__
+        if doc_string:
+            parameter_in_doc_string = f"{parameter.name} :"
+            for l in doc_string.split("\n"):
+                l = l.strip()
+                if l.startswith(parameter_in_doc_string):
+                    possible_primitive = l.replace(parameter_in_doc_string, "").strip().split(",")[0]
+                    if possible_primitive in ["bool", "int", "float", "str"]:
+                        return ModelField.infer(
+                            name=parameter.name,
+                            value=None,
+                            annotation=locate(possible_primitive),
+                            class_validators=None,
+                            config=BaseConfig,
+                        )
+
+
 MAPPER_CLASSES = [
     SearchableToPydanticMapper,
     IterableToPydanticMapper,
@@ -207,7 +230,7 @@ def type_to_pseudo_pydantic_model(t: Type, alternative_name: str = None):
     if is_primitive_type(t):
         return t
 
-    model = new_pseudo_pydantic_model(t.__name__ if hasattr(t, '__name__') else alternative_name)
+    model = new_pseudo_pydantic_model(t.__name__ if hasattr(t, "__name__") else alternative_name)
     sig = signature(t.__init__)
     init_parameters: List[Parameter] = list(sig.parameters.values())[1:]
     for parameter in init_parameters:
@@ -223,5 +246,15 @@ def type_to_pseudo_pydantic_model(t: Type, alternative_name: str = None):
                     if field:
                         model.__fields__[parameter.name] = field
                     break
+        else:
+            field = DocToPydanticMapper.map(t, parameter)
+            if field:
+                model.__fields__[parameter.name] = field
 
     return model
+
+
+if __name__ == "__main__":
+    from sklearn.tree import DecisionTreeClassifier
+
+    print(type_to_pseudo_pydantic_model(DecisionTreeClassifier).schema_json())

@@ -16,13 +16,13 @@ class RiverClassifierModel(ClassModel):
         return Classifier
 
     @classmethod
-    def from_class(cls, source_class: Type) -> 'RiverClassifierModel':
+    def from_class(cls, source_class: Type) -> "RiverClassifierModel":
         _id = class_to_id(source_class)
-        docs_split = _id.split('.')
+        docs_split = _id.split(".")
         docs_version = river.__version__
         docs_name = docs_split[3] if len(docs_split) > 3 else docs_split[2]
         return cls(
             id=_id,
             name=source_class.__name__,
-            docs_url=f'https://riverml.xyz/{docs_version}/api/{docs_split[1].replace("_", "-")}/{docs_name}/'
+            docs_url=f"https://riverml.xyz/{docs_version}/api/{docs_split[1].replace('_', '-')}/{docs_name}/"
         )

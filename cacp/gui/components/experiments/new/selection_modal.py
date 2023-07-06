@@ -1,5 +1,3 @@
-import uuid
-
 import dash_bootstrap_components as dbc
 import dash_rjsf
 from dash import html, Output, Input, callback, State, ctx, no_update
@@ -10,36 +8,12 @@ SUBMIT_BUTTON_OPTIONS_NAME = "ui:submitButtonOptions"
 
 class SelectionModal(html.Span):
     class ids:
-        modal_open_button = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'dataset-modal-open-button',
-            'aio_id': aio_id
-        }
-        modal_close_button = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'dataset-modal-close-button',
-            'aio_id': aio_id
-        }
-        modal_add_all_button = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'dataset-modal-add-all-button',
-            'aio_id': aio_id
-        }
-        modal = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'dataset-modal',
-            'aio_id': aio_id
-        }
-        selection_store = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'selection-store',
-            'aio_id': aio_id
-        }
-        rjsf = lambda aio_id: {
-            'component': 'AddSelectionModal',
-            'subcomponent': 'rjsf',
-            'aio_id': aio_id
-        }
+        modal_open_button = lambda aio_id: f"SelectionModal-modal_open_button-{aio_id}"
+        modal_close_button = lambda aio_id: f"SelectionModal-modal_close_button-{aio_id}"
+        modal_add_all_button = lambda aio_id: f"SelectionModal-modal_add_all_button-{aio_id}"
+        modal = lambda aio_id: f"SelectionModal-modal-{aio_id}"
+        selection_store = lambda aio_id: f"SelectionModal-selection_store-{aio_id}"
+        rjsf = lambda aio_id: f"SelectionModal-rjsf-{aio_id}"
 
     ids = ids
 
@@ -47,29 +21,27 @@ class SelectionModal(html.Span):
         self,
         name,
         source_table,
-        store_id,
-        aio_id=None,
+        aio_id,
         button_kwargs=None,
     ):
 
-        if aio_id is None:
-            self.aio_id = str(uuid.uuid4())
         if button_kwargs is None:
             button_kwargs = {}
 
-        self.store_id = store_id
+        self.aio_id = aio_id
+        self.store_id = f"{aio_id}-store"
 
-        table = source_table(store_id=self.ids.selection_store(self.aio_id))
+        table = source_table(store_id=self.ids.selection_store(aio_id), aio_id=aio_id)
 
         super().__init__([
-            dbc.Button(name, id=self.ids.modal_open_button(self.aio_id), n_clicks=0, outline=True, color="primary",
+            dbc.Button(name, id=self.ids.modal_open_button(aio_id), n_clicks=0, outline=True, color="primary",
                        **button_kwargs),
 
             dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle(name)),
                     dbc.ModalBody([
-                        dbc.Button("Submit all using default properties", id=self.ids.modal_add_all_button(self.aio_id),
+                        dbc.Button("Submit all using default properties", id=self.ids.modal_add_all_button(aio_id),
                                    outline=True,
                                    color="primary"),
                         html.Br(),
@@ -77,7 +49,7 @@ class SelectionModal(html.Span):
                         table,
                         html.Br(),
                         dash_rjsf.DashRjsf(
-                            id=self.ids.rjsf(self.aio_id),
+                            id=self.ids.rjsf(aio_id),
                             schema={
                             },
                             uiSchema={SUBMIT_BUTTON_OPTIONS_NAME: {
@@ -92,7 +64,7 @@ class SelectionModal(html.Span):
                     ]),
                     Store(id=self.store_id)
                 ],
-                id=self.ids.modal(self.aio_id),
+                id=self.ids.modal(aio_id),
                 size="xl",
                 is_open=False,
             ),
@@ -100,18 +72,19 @@ class SelectionModal(html.Span):
         ], )
 
         @callback(
-            Output(self.ids.rjsf(self.aio_id), 'schema'),
-            Output(self.ids.rjsf(self.aio_id), 'uiSchema'),
-            Input(self.ids.selection_store(self.aio_id), 'data')
+            Output(self.ids.rjsf(aio_id), "value"),
+            Output(self.ids.rjsf(aio_id), "schema"),
+            Output(self.ids.rjsf(aio_id), "uiSchema"),
+            Input(self.ids.selection_store(aio_id), "data")
         )
         def on_table_selection(data):
             if data:
                 schema = data[0]["json_schema"]
-                if schema['properties']:
-                    schema['title'] = "Provide parameters for " + schema['title']
+                if schema["properties"]:
+                    schema["title"] = "Provide parameters for " + schema["title"]
                 else:
-                    schema['title'] = ""
-                return schema, {SUBMIT_BUTTON_OPTIONS_NAME: {
+                    schema["title"] = ""
+                return None, schema, {SUBMIT_BUTTON_OPTIONS_NAME: {
                     "submitText": "Submit",
                     "norender": False,
                     "props": {
@@ -119,7 +92,7 @@ class SelectionModal(html.Span):
                         "className": "rxjs-submit"
                     }
                 }}
-            return {}, {SUBMIT_BUTTON_OPTIONS_NAME: {
+            return None, {}, {SUBMIT_BUTTON_OPTIONS_NAME: {
                 "submitText": "Submit",
                 "norender": False,
                 "props": {
@@ -129,13 +102,13 @@ class SelectionModal(html.Span):
             }}
 
         @callback(
-            Output(self.store_id, 'data'),
-            Output(self.ids.modal(self.aio_id), "is_open"),
-            Input(self.ids.rjsf(self.aio_id), 'value'),
-            State(self.ids.selection_store(self.aio_id), 'data'),
-            Input(self.ids.modal_open_button(self.aio_id), "n_clicks"),
-            Input(self.ids.modal_add_all_button(self.aio_id), "n_clicks"),
-            Input(self.ids.rjsf(self.aio_id), 'n_clicks'),
+            Output(self.store_id, "data"),
+            Output(self.ids.modal(aio_id), "is_open"),
+            Input(self.ids.rjsf(aio_id), "value"),
+            State(self.ids.selection_store(aio_id), "data"),
+            Input(self.ids.modal_open_button(aio_id), "n_clicks"),
+            Input(self.ids.modal_add_all_button(aio_id), "n_clicks"),
+            Input(self.ids.rjsf(aio_id), "n_clicks"),
 
         )
         def on_open_click_or_selection(values, selected, open_button_n_clicks, _add_all_button_n_clicks,
@@ -143,14 +116,17 @@ class SelectionModal(html.Span):
             new_data = no_update
             new_modal_is_open = no_update
 
-            if ctx.triggered_id == self.ids.modal_open_button(self.aio_id) and open_button_n_clicks:
+            if ctx.triggered_id == self.ids.modal_open_button(aio_id) and open_button_n_clicks:
                 new_modal_is_open = True
 
-            if ctx.triggered_id == self.ids.rjsf(self.aio_id):
+            # add single
+            if selected and ctx.triggered_id == self.ids.rjsf(aio_id) and values is not None:
                 new_data = [dict(init_values=values, **s) for s in selected]
+                # TODO: validate if can be initialized with user params
                 new_modal_is_open = False
 
-            if ctx.triggered_id == self.ids.modal_add_all_button(self.aio_id):
+            # submit all
+            if ctx.triggered_id == self.ids.modal_add_all_button(aio_id):
                 new_data = [dict(init_values={}, **d) for d in table.data]
                 new_modal_is_open = False
 

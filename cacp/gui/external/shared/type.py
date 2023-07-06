@@ -3,7 +3,7 @@ from typing import Type
 
 
 def class_to_id(cls: Type):
-    return cls.__module__ + '.' + cls.__name__
+    return cls.__module__ + "." + cls.__name__
 
 
 def get_all_subclasses(cls: Type):
@@ -21,7 +21,7 @@ def get_all_non_abstract_subclasses(cls):
     return [s for s in all_subclasses if not isabstract(s)]
 
 
-PRIMITIVE_TYPES = (bool, int, float, complex, str, bool)
+PRIMITIVE_TYPES = (bool, int, float, complex, str)
 
 
 def is_primitive_type(thing):

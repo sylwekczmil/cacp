@@ -5,20 +5,29 @@ from dash import html
 def sidebar_component():
     return html.Div(
         [
-            html.H2(dbc.NavLink("CACP", href="/", active="exact"), className="display-4"),
-            html.Hr(),
-            html.P(
-                "Classification Algorithms Comparison Pipeline", className="lead"
-            ),
-            dbc.Nav(
-                [
-                    dbc.NavLink("Classifiers", href="/classifiers", active="exact"),
-                    dbc.NavLink("Datasets", href="/datasets", active="exact"),
-                    dbc.NavLink("Experiments", href="/experiments"),
-                ],
-                vertical=True,
-                pills=True,
-            ),
+            html.Div([
+                html.Div([
+                    html.H2(dbc.NavLink("CACP", href="/"), className="display-4"),
+                    html.Hr(),
+                    html.P(
+                        "Classification Algorithms Comparison Pipeline", className="lead"
+                    ),
+                    dbc.Nav(
+                        [
+                            dbc.NavLink("Datasets", href="/datasets", active="exact"),
+                            dbc.NavLink("Classifiers", href="/classifiers", active="exact"),
+                            dbc.NavLink("Metrics", href="/metrics", active="exact"),
+                            dbc.NavLink("Experiments", href="/", active="exact"),
+                            html.Br(),
+                        ],
+                        vertical=True,
+                        pills=True,
+                    ),
+                ]),
+                dbc.Button("Create new experiment", href="/experiment-form"),
+            ],
+                className="d-flex justify-content-between flex-column h-100"),
+
         ],
         style={
             "position": "fixed",
@@ -28,5 +37,5 @@ def sidebar_component():
             "width": "16rem",
             "padding": "2rem 1rem",
             "background-color": "#f8f9fa",
-        },
+        }
     )

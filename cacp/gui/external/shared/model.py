@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from cacp.gui.external.shared.schema import type_to_pseudo_pydantic_model
 from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, class_to_id
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 BASE_DATE_FORMAT = "%d/%m/%Y %H:%M:%S"
 

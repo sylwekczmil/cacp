@@ -6,8 +6,3 @@
 .rjsf > .border-danger {
     display: none !important;
 }
-
-.delete-button:hover {
-    cursor: pointer;
-    color: red;
-}

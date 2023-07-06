@@ -7,9 +7,9 @@ from cacp.gui.components.classifiers.sklearn_classifiers_table import SklearnCla
 dash.register_page(__name__)
 
 layout = html.Div([
-    html.H5("Sklearn classifiers (batch)"),
-    SklearnClassifiersTable(),
-    html.Br(),
-    html.H5("River classifiers (incremental)"),
-    RiverClassifiersTable(),
+    html.H5("Custom classifiers (batch, incremental)"),
+    html.H5("Sklearn classifiers (batch)", className="mt-4"),
+    SklearnClassifiersTable("sct"),
+    html.H5("River classifiers (incremental)", className="mt-4"),
+    RiverClassifiersTable("rct"),
 ])

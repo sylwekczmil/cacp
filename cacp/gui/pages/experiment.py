@@ -1,10 +1,7 @@
 import dash
-from dash import html
+
+from cacp.gui.components.experiments.details.view import ExperimentDetails
 
 dash.register_page(__name__, path_template="/experiment/<experiment_id>")
 
-
-def layout(experiment_id=None):
-    return html.Div([
-        html.Div(f'This is experiment {experiment_id}'),
-    ])
+layout = ExperimentDetails("ed")

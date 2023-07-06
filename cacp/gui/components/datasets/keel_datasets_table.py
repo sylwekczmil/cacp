@@ -1,5 +1,3 @@
-import uuid
-
 import dash_ag_grid as dag
 import pandas as pd
 from dash import html, callback, Input, Output
@@ -12,16 +10,8 @@ from cacp.gui.external.shared.type import class_to_id
 
 class KeelDatasetsTable(html.Div):
     class ids:
-        table = lambda aio_id: {
-            'component': 'KeelDatasetsTable',
-            'subcomponent': 'table',
-            'aio_id': aio_id
-        }
-        store_id = lambda aio_id: {
-            'component': 'KeelDatasetsTable',
-            'subcomponent': 'store_id',
-            'aio_id': aio_id
-        }
+        table = lambda aio_id: f"KeelDatasetsTable-table-{aio_id}"
+        store_id = lambda aio_id: f"KeelDatasetsTable-store_id-{aio_id}"
 
     ids = ids
 
@@ -32,7 +22,7 @@ class KeelDatasetsTable(html.Div):
                 {**r,
                  "docs_url": f"https://sci2s.ugr.es/keel/dataset/data/classification/{r['Name']}-names.txt",
                  "json_schema": {
-                     "title": r['Name'],
+                     "title": r["Name"],
                      "type": "object",
                      "properties": {
                      }
@@ -44,13 +34,9 @@ class KeelDatasetsTable(html.Div):
 
     def __init__(
         self,
-        store_id=None,
-        aio_id=None
+        aio_id,
+        store_id=None
     ):
-
-        if aio_id is None:
-            aio_id = str(uuid.uuid4())
-
         self.store_id = store_id
         if store_id is None:
             self.store_id = self.ids.store_id(aio_id)
@@ -60,23 +46,24 @@ class KeelDatasetsTable(html.Div):
                 id=self.ids.table(aio_id),
                 rowData=self.data,
                 columnDefs=[
-                    {'field': '#', "headerName": "#", "maxWidth": 100, "checkboxSelection": bool(store_id)},
-                    {'field': 'Name', "headerName": "Name"},
-                    {'field': 'docs_url', "cellRenderer": "markdown", "headerName": "Docs", "maxWidth": None},
-                    {'field': 'Instances'},
-                    {'field': 'Features'},
-                    {'field': 'Classes'},
+                    {"field": "#", "headerName": "#", "maxWidth": 100, "checkboxSelection": bool(store_id)},
+                    {"field": "Name", "headerName": "Name"},
+                    {"field": "docs_url", "cellRenderer": "markdown", "headerName": "Docs", "maxWidth": None},
+                    {"field": "Instances"},
+                    {"field": "Features"},
+                    {"field": "Classes"},
                 ],
-                defaultColDef={"maxWidth": 160, "sortable": True, "filter": True},
+                defaultColDef={"maxWidth": 160, "sortable": True, "filter": True, "resizable": True},
                 dashGridOptions={"rowSelection": "single"} if store_id else None,
                 columnSize="responsiveSizeToFit",
             ),
-            Store(id=self.store_id)
+            Store(id=store_id) if store_id else ""
         ])
 
-        @callback(
-            Output(self.store_id, "data"),
-            Input(self.ids.table(aio_id), 'selectedRows'),
-        )
-        def selection_change(selected):
-            return selected
+        if store_id:
+            @callback(
+                Output(store_id, "data"),
+                Input(self.ids.table(aio_id), "selectedRows"),
+            )
+            def selection_change(selected):
+                return selected
