@@ -6,12 +6,18 @@ from dash import Output
 
 
 def csv_to_grid(path: Path, skip_first_column=False):
-    df = pd.read_csv(path)
-    columns = df.columns
-    if skip_first_column:
-        columns = columns[1:]
+    columns = []
+    row_data = []
+
+    if path.exists():
+        df = pd.read_csv(path)
+        columns = df.columns
+        if skip_first_column:
+            columns = columns[1:]
+        row_data = df[columns].to_dict("records")
+
     return dag.AgGrid(
-        rowData=df[columns].to_dict("records"),
+        rowData=row_data,
         columnDefs=[
             {"field": c} for c in columns
         ],

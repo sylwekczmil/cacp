@@ -7,16 +7,16 @@ from cacp.gui.db.experiments import get_all_experiments, delete_experiment
 
 dash.register_page(__name__, path="/")
 
-experiments_table_id = "experiments_table"
+EXPERIMENTS_TABLE_ID = "experiments_table"
 
 
 def layout():
     init_experiments = get_all_experiments()
 
-    view = html.Div([
+    return html.Div([
         html.H5("Experiments"),
         dag.AgGrid(
-            id=experiments_table_id,
+            id=EXPERIMENTS_TABLE_ID,
             rowData=init_experiments,
             columnDefs=[
                 {"field": "name"},
@@ -28,7 +28,6 @@ def layout():
                 {"field": "created at"},
                 {
                     "field": "remove", "headerName": "", "sortable": False, "filter": False, "resizable": False,
-                    "maxWidth": 120,
                     "cellRenderer": "Button",
                     "cellRendererParams": {
                         "buttonName": "Delete",
@@ -38,7 +37,6 @@ def layout():
                 },
                 {
                     "field": "navigate", "headerName": "", "sortable": False, "filter": False, "resizable": False,
-                    "maxWidth": 110,
                     "cellRenderer": "Button",
                     "cellRendererParams": {
                         "buttonName": "Open",
@@ -47,18 +45,18 @@ def layout():
                     },
                 },
             ],
-            defaultColDef={"maxWidth": 200, "sortable": True, "filter": True, "resizable": True},
+            defaultColDef={"sortable": True, "filter": True, "resizable": True},
             columnSize="responsiveSizeToFit",
+            style={"height": "90vh"}
         ),
     ])
-    return view
 
 
 @callback(
-    Output(experiments_table_id, "rowData"),
+    Output(EXPERIMENTS_TABLE_ID, "rowData"),
     location_href_output(),
-    Input(experiments_table_id, "cellRendererData"),
-    State(experiments_table_id, "rowData"),
+    Input(EXPERIMENTS_TABLE_ID, "cellRendererData"),
+    State(EXPERIMENTS_TABLE_ID, "rowData"),
     prevent_initial_call=True,
 )
 def on_experiments_renderer_data(

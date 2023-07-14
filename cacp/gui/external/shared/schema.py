@@ -62,7 +62,7 @@ class ToPydanticMapper(ABC):
 
 @dataclass
 class SearchableToPydanticMapper(ToPydanticMapper):
-    searchable: Type = None
+    searchable: Optional[Type] = None
 
     def can_map(self) -> bool:
         annotation = self.annotation
@@ -74,18 +74,9 @@ class SearchableToPydanticMapper(ToPydanticMapper):
 
         return False
 
-    def map(self) -> ModelField:
-        # TODO: disabled for now, deep level of setup is not required
+    def map(self) -> None:
+        # disabled for now, deep level of setup is not required, and is causing recursion
         return None
-
-        # annotation = self._searchable_type_to_pseudo_pydantic_model(self.searchable, self.annotation)
-        # return ModelField.infer(
-        #     name=self.parameter.name,
-        #     value=None,
-        #     annotation=annotation,
-        #     class_validators=None,
-        #     config=BaseConfig,
-        # )
 
     @staticmethod
     @lru_cache
@@ -174,6 +165,8 @@ class AnyAbstractToPydanticMapper(ToPydanticMapper):
 class AnyToPydanticMapper(ToPydanticMapper):
 
     def can_map(self) -> bool:
+        if "typing.Callable" in str(self.annotation):
+            return False
         return True
 
     def map(self) -> ModelField:
@@ -252,9 +245,3 @@ def type_to_pseudo_pydantic_model(t: Type, alternative_name: str = None):
                 model.__fields__[parameter.name] = field
 
     return model
-
-
-if __name__ == "__main__":
-    from sklearn.tree import DecisionTreeClassifier
-
-    print(type_to_pseudo_pydantic_model(DecisionTreeClassifier).schema_json())

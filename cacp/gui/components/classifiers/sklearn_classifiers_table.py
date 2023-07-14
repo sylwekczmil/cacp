@@ -21,6 +21,8 @@ class SklearnClassifiersTable(html.Div):
         aio_id,
         store_id=None
     ):
+
+        self.store_id = store_id
         if store_id is None:
             self.store_id = self.ids.store_id(aio_id)
 
@@ -38,7 +40,7 @@ class SklearnClassifiersTable(html.Div):
                 dashGridOptions={"rowSelection": "single"} if store_id else None,
                 columnSize="responsiveSizeToFit",
             ),
-            Store(id=store_id) if store_id else ""
+            Store(id=self.store_id)
         ])
 
         if store_id:

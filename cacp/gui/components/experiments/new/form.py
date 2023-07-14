@@ -180,11 +180,12 @@ class NewExperimentForm(html.Div):
             _type_value: ExperimentType,
             prev_data: list
         ):
+
             if ctx.triggered_id == self.ids.type_input(aio_id):
                 return []
             elif ctx.triggered_id == keel_datasets_selection.store_id and selected_keel_dataset_data:
                 return prev_data + [{**d, "name": d["Name"]} for d in selected_keel_dataset_data]
-            elif ctx.triggered_id == river_datasets_selection and selected_river_dataset_data:
+            elif ctx.triggered_id == river_datasets_selection.store_id and selected_river_dataset_data:
                 return prev_data + selected_river_dataset_data
             elif ctx.triggered_id == selected_datasets_table.ids.table(selected_datasets_table.aio_id):
                 del prev_data[cell_renderer_data["rowIndex"]]
@@ -210,8 +211,8 @@ class NewExperimentForm(html.Div):
                 errors = []
                 if not name_value:
                     errors.append("Name can not be empty.")
-                if len(selected_datasets) < 2:
-                    errors.append("At least 2 datasets need to be selected.")
+                if len(selected_datasets) == 0:
+                    errors.append("At least 1 dataset need to be selected.")
                 if len(selected_classifiers) < 2:
                     errors.append("At least 2 classifiers need to be selected.")
                 if errors:

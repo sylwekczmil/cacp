@@ -11,6 +11,10 @@ from dash.dcc import Location
 from cacp.gui.components.shared.sidebar import sidebar_component
 from cacp.gui.db import DB_PATH
 
+CACHE_PATH = DB_PATH / ".cache"
+CACHE_PATH.mkdir(exist_ok=True, parents=True)
+BACKGROUND_CALLBACK_MANAGER = DiskcacheManager(diskcache.Cache(CACHE_PATH))
+
 
 def start(debug: bool = False, host="127.0.0.1", port=8050):
     log_level = logging.INFO if debug else logging.ERROR
@@ -19,7 +23,7 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
     flask.cli.show_server_banner = lambda *_args, **_kwargs: None
 
     app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO, dbc.icons.BOOTSTRAP], use_pages=True,
-               background_callback_manager=DiskcacheManager(diskcache.Cache(DB_PATH / ".cache")))
+               background_callback_manager=BACKGROUND_CALLBACK_MANAGER)
 
     app.layout = html.Div([
         Location(id="location"),
@@ -39,4 +43,4 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
 
 
 if __name__ == "__main__":
-    start(debug=True, host="0.0.0.0", port=8050)
+    start(debug=True, host="127.0.0.1", port=8050)

@@ -76,7 +76,8 @@ def process_comparison(
     custom_fold_modifiers: typing.List[ClassificationFoldDataModifierBase] = None,
     dob_scv: bool = True,
     categorical_to_numerical=True,
-    normalized: bool = False
+    normalized: bool = False,
+    progress=lambda progress, total: None,
 ):
     """
     Runs comparison for provided datasets and classifiers.
@@ -90,6 +91,7 @@ def process_comparison(
     :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
     :param categorical_to_numerical: if dataset categorical values should be converted to numerical
     :param normalized: if the data should be normalized in range [0..1]
+    :param progress: function that can be used to monitor progress
 
     """
     count = 0
@@ -105,6 +107,7 @@ def process_comparison(
         fold_modifiers.append(ClassificationFoldDataNormalizer())
 
     with tqdm(total=len(datasets) * n_folds, desc='Processing comparison', unit='fold') as pbar:
+        progress(pbar.n, pbar.total)
         for dataset_idx, dataset in enumerate(datasets):
             for fold in dataset.folds(n_folds=n_folds, dob_scv=dob_scv,
                                       categorical_to_numerical=categorical_to_numerical):
@@ -119,6 +122,7 @@ def process_comparison(
                 )
                 records.extend(rows)
                 pbar.update(1)
+                progress(pbar.n, pbar.total)
 
             df = pd.DataFrame(records)
             df = df.sort_values(by=['Dataset', 'Algorithm', 'CV index'])
@@ -241,7 +245,8 @@ def process_incremental_comparison(
     datasets: typing.List[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],
     result_dir: Path,
-    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS,
+    progress=lambda progress, total: None,
 ):
     """
     Runs comparison for provided datasets and incremental classifiers.
@@ -250,6 +255,7 @@ def process_incremental_comparison(
     :param classifiers: classifiers collection
     :param result_dir: results directory
     :param metrics: metrics collection
+    :param progress: function that can be used to monitor progress
 
     """
 
@@ -260,6 +266,7 @@ def process_incremental_comparison(
     df = None
 
     with tqdm(total=len(datasets), desc='Processing comparison', unit='dataset') as pbar:
+        progress(pbar.n, pbar.total)
         for dataset_idx, dataset in enumerate(datasets):
 
             # preload dataset to prevent race conditions on file savings and count classes
@@ -276,6 +283,7 @@ def process_incremental_comparison(
             )
             records.extend(rows)
             pbar.update(1)
+            progress(pbar.n, pbar.total)
 
             df = pd.DataFrame(records)
             df = df.sort_values(by=['Dataset', 'Algorithm'])

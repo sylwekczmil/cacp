@@ -1,35 +1,18 @@
 import dash_ag_grid as dag
-import pandas as pd
 from dash import html, callback, Input, Output
 from dash.dcc import Store
 
-from cacp import ClassificationDataset
-from cacp.gui.assets import ASSETS_PATH
-from cacp.gui.external.shared.type import class_to_id
 
-
-class KeelDatasetsTable(html.Div):
+class CustomDatasetsTable(html.Div):
     class ids:
-        table = lambda aio_id: f"KeelDatasetsTable-table-{aio_id}"
-        store_id = lambda aio_id: f"KeelDatasetsTable-store_id-{aio_id}"
+        table = lambda aio_id: f"CustomDatasetsTable-table-{aio_id}"
+        store_id = lambda aio_id: f"CustomDatasetsTable-store_id-{aio_id}"
 
     ids = ids
 
     @property
     def data(self):
         return [
-            {**r, "docs_url": f"[{r['docs_url']}]({r['docs_url']})"} for r in [
-                {**r,
-                 "docs_url": f"https://sci2s.ugr.es/keel/dataset/data/classification/{r['Name']}-names.txt",
-                 "json_schema": {
-                     "title": r["Name"],
-                     "type": "object",
-                     "properties": {
-                     }
-                 },
-                 "id": class_to_id(ClassificationDataset)
-                 } for r in pd.read_csv(ASSETS_PATH.joinpath("datasets.csv")).to_dict("records")
-            ]
         ]
 
     def __init__(
@@ -49,7 +32,6 @@ class KeelDatasetsTable(html.Div):
                 columnDefs=[
                     {"field": "#", "headerName": "#", "maxWidth": 100, "checkboxSelection": bool(store_id)},
                     {"field": "Name", "headerName": "Name"},
-                    {"field": "docs_url", "cellRenderer": "markdown", "headerName": "Docs", "maxWidth": None},
                     {"field": "Instances"},
                     {"field": "Features"},
                     {"field": "Classes"},
