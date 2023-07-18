@@ -1,6 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html, Output, callback, Input, State, ctx, no_update
 
+from cacp.gui.components.classifiers.custom_classifiers_table import CustomClassifiersTable
 from cacp.gui.components.classifiers.river_classifiers_table import RiverClassifiersTable
 from cacp.gui.components.classifiers.sklearn_classifiers_table import SklearnClassifiersTable
 from cacp.gui.components.datasets.keel_datasets_table import KeelDatasetsTable
@@ -8,7 +9,7 @@ from cacp.gui.components.datasets.river_datasets_table import RiverDatasetsTable
 from cacp.gui.components.experiments.new.selected_classifiers_table import SelectedClassifiersTable
 from cacp.gui.components.experiments.new.selected_datasets_table import SelectedDatasetsTable
 from cacp.gui.components.experiments.new.selection_modal import SelectionModal
-from cacp.gui.components.shared.utils import location_href_output
+from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.experiments import ExperimentType, add_experiment
 
 
@@ -67,6 +68,9 @@ class NewExperimentForm(html.Div):
             "Add River dataset", RiverDatasetsTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rd"
         )
+        custom_classifiers_selection = SelectionModal(
+            "Add custom classifiers", CustomClassifiersTable, aio_id=f"{aio_id}-cc"
+        )
         river_classifiers_selection = SelectionModal(
             "Add River classifiers", RiverClassifiersTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rc"
@@ -94,7 +98,7 @@ class NewExperimentForm(html.Div):
                 selected_datasets_table,
                 html.Br(),
                 html.Div([
-                    sklearn_classifiers_selection, river_classifiers_selection,
+                    custom_classifiers_selection, sklearn_classifiers_selection, river_classifiers_selection,
                 ]),
                 html.Br(),
                 html.H5("Selected classifiers"),
@@ -141,6 +145,7 @@ class NewExperimentForm(html.Div):
 
         @callback(
             Output(self.ids.selected_classifiers_store(aio_id), "data"),
+            Input(custom_classifiers_selection.store_id, "data"),
             Input(sklearn_classifiers_selection.store_id, "data"),
             Input(river_classifiers_selection.store_id, "data"),
             Input(selected_classifiers_table.ids.table(selected_classifiers_table.aio_id), "cellRendererData"),
@@ -148,6 +153,7 @@ class NewExperimentForm(html.Div):
             State(self.ids.selected_classifiers_store(aio_id), "data")
         )
         def selected_classifier(
+            selected_custom_classifier_data: list,
             selected_sklearn_classifier_data: list,
             selected_river_classifier_data: list,
             cell_renderer_data: dict,
@@ -156,6 +162,8 @@ class NewExperimentForm(html.Div):
         ):
             if ctx.triggered_id == self.ids.type_input(aio_id):
                 return []
+            elif ctx.triggered_id == custom_classifiers_selection.store_id and selected_custom_classifier_data:
+                return prev_data + selected_custom_classifier_data
             elif ctx.triggered_id == sklearn_classifiers_selection.store_id and selected_sklearn_classifier_data:
                 return prev_data + selected_sklearn_classifier_data
             elif ctx.triggered_id == river_classifiers_selection.store_id and selected_river_classifier_data:
@@ -193,7 +201,7 @@ class NewExperimentForm(html.Div):
             return no_update
 
         @callback(
-            location_href_output(),
+            global_location_href_output(),
             Output(self.ids.toast(aio_id), "children"),
             Output(self.ids.toast(aio_id), "is_open"),
             Input(self.ids.create_button(aio_id), "n_clicks"),

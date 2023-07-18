@@ -9,6 +9,7 @@ from dash import page_container
 from dash.dcc import Location
 
 from cacp.gui.components.shared.sidebar import sidebar_component
+from cacp.gui.components.shared.utils import GLOBAL_LOCATION_ID
 from cacp.gui.db import DB_PATH
 
 CACHE_PATH = DB_PATH / ".cache"
@@ -22,11 +23,14 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
     flask_log.setLevel(log_level)
     flask.cli.show_server_banner = lambda *_args, **_kwargs: None
 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO, dbc.icons.BOOTSTRAP], use_pages=True,
-               background_callback_manager=BACKGROUND_CALLBACK_MANAGER)
-
+    app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.COSMO, dbc.icons.BOOTSTRAP],
+        use_pages=True,
+        background_callback_manager=BACKGROUND_CALLBACK_MANAGER
+    )
     app.layout = html.Div([
-        Location(id="location"),
+        Location(id=GLOBAL_LOCATION_ID),
         sidebar_component(),
         html.Div(id="page-content", style={
             "margin-left": "18rem",
@@ -35,7 +39,6 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
         }, children=[page_container]),
 
     ])
-
     app.logger.setLevel(log_level)
 
     print(f"CACP stared on http://{host}:{port}/")
@@ -43,4 +46,4 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
 
 
 if __name__ == "__main__":
-    start(debug=True, host="127.0.0.1", port=8050)
+    start(debug=False, host="127.0.0.1", port=8050)

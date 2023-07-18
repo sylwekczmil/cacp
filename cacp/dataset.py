@@ -199,7 +199,7 @@ class ClassificationDataset(ClassificationDatasetBase):
         n_folds: AVAILABLE_N_FOLDS = 10,
         dob_scv: bool = True,
         categorical_to_numerical=True
-    ) -> typing.Iterable[ClassificationFoldData]:
+    ) -> typing.Iterator[ClassificationFoldData]:
 
         zip_data_name = f'{self.name}-{n_folds}-{"dobscv" if dob_scv else "fold"}'
         data_path = self._fetch_data(zip_data_name, dob_scv)

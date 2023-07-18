@@ -65,18 +65,17 @@ def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callab
         cz = c(2, 2).__class__
         library = cz.__module__.split('.')[0]
         name = cz.__name__
-        name = name.replace('Classifier', '')
-        classifier_type = 'custom'
+        classifier_type = 'CUSTOM'
         if library == 'sklearn':
-            classifier_type = 'offline'
+            classifier_type = 'BATCH'
         elif library == 'skmultiflow':
-            classifier_type = 'incremental'
+            classifier_type = 'INCREMENTAL'
         elif library == 'river':
-            classifier_type = 'incremental'
+            classifier_type = 'INCREMENTAL'
 
         row = {
-            'Acronym': cn,
-            'Name': name,
+            'Name': cn,
+            'Class Name': name,
             'Library': library,
             'Type': classifier_type
         }
@@ -84,7 +83,7 @@ def classifier_info(classifiers: typing.Iterable[typing.Tuple[str, typing.Callab
 
     df = pd.DataFrame(records)
     df = df.drop_duplicates()
-    df.sort_values(['Type', 'Acronym'], inplace=True)
+    df.sort_values(['Type', 'Name'], inplace=True)
     df = df.reset_index(drop=True)
     df.index += 1
     info_dir = result_dir.joinpath('info')

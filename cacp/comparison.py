@@ -22,11 +22,12 @@ DEFAULT_INCREMENTAL_METRICS = (
 )
 
 
-def process_comparison_single(classifier_factory, classifier_name,
-                              dataset: ClassificationDatasetBase,
-                              fold: ClassificationFoldData,
-                              metrics: typing.Sequence[typing.Tuple[str, typing.Callable]],
-                              ) -> dict:
+def process_comparison_single(
+    classifier_factory, classifier_name,
+    dataset: ClassificationDatasetBase,
+    fold: ClassificationFoldData,
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]],
+) -> dict:
     """
     Runs comparison on single classifier and dataset.
 

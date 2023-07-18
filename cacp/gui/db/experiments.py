@@ -39,7 +39,7 @@ def _convert_from_document_to_experiment(experiment: Document) -> Experiment:
     experiment["id"] = experiment.doc_id
     experiment["number of datasets"] = len(experiment["datasets"])
     experiment["number of classifiers"] = len(experiment["classifiers"])
-    experiment["created at"] = datetime.fromtimestamp(experiment["created_at"])
+    experiment["created at"] = datetime.fromtimestamp(experiment["created_at"]).strftime("%Y-%m-%d %H:%M:%S")
     return experiment
 
 

@@ -26,10 +26,11 @@ class SelectedClassifiersTable(html.Div):
                 rowData=init_data,
                 columnDefs=[
                     {"field": "name", "headerName": "Name"},
-                    {"field": "docs_url", "cellRenderer": "markdown", "headerName": "Docs", "maxWidth": None},
-                    {"field": "id", "cellRenderer": "markdown", "headerName": "Python path", "maxWidth": None},
+                    {"field": "docs_url", "cellRenderer": "markdown", "headerName": "Docs"},
+                    {"field": "id", "cellRenderer": "markdown", "headerName": "Python path"},
                     {
-                        "field": "name", "headerName": "", "sortable": False, "filter": False, "resizable": False,
+                        "field": "name", "headerName": "", "maxWidth": 160, "sortable": False, "filter": False,
+                        "resizable": False,
                         "cellRenderer": "Button",
                         "cellRendererParams": {
                             "buttonName": "Delete",
@@ -38,7 +39,7 @@ class SelectedClassifiersTable(html.Div):
                         },
                     },
                 ],
-                defaultColDef={"maxWidth": 160, "sortable": True, "filter": True, "resizable": True},
+                defaultColDef={"sortable": True, "filter": True, "resizable": True},
                 columnSize="responsiveSizeToFit",
             ),
             Store(id=store_id, data=init_data)

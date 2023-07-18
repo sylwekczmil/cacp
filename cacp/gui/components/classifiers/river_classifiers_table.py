@@ -8,7 +8,7 @@ from cacp.gui.external.classifier import RIVER_CLASSIFIERS
 class RiverClassifiersTable(html.Div):
     class ids:
         table = lambda aio_id: f"RiverClassifiersTable-table-{aio_id}"
-        store_id = lambda aio_id: f"RiverClassifiersTable-store_id-{aio_id}"
+        store = lambda aio_id: f"RiverClassifiersTable-store-{aio_id}"
 
     ids = ids
 
@@ -24,7 +24,7 @@ class RiverClassifiersTable(html.Div):
 
         self.store_id = store_id
         if store_id is None:
-            self.store_id = self.ids.store_id(aio_id)
+            self.store_id = self.ids.store(aio_id)
 
         super().__init__([
             dag.AgGrid(

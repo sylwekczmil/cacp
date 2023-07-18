@@ -1,10 +1,10 @@
-,Acronym,Name,Library,Type
-1,AB,AdaBoost,sklearn,offline
-2,DT,DecisionTree,sklearn,offline
-3,GNB,GaussianNB,sklearn,offline
-4,KNN,KNeighbors,sklearn,offline
-5,MLP,MLP,sklearn,offline
-6,NC,NearestCentroid,sklearn,offline
-7,RF,RandomForest,sklearn,offline
-8,SVC,SVC,sklearn,offline
-9,XGB,XGBoost,xgboost,offline
+,Name,Class Name,Library,Type
+1,AB,AdaBoost,sklearn,BATCH
+2,DT,DecisionTree,sklearn,BATCH
+3,GNB,GaussianNB,sklearn,BATCH
+4,KNN,KNeighbors,sklearn,BATCH
+5,MLP,MLP,sklearn,BATCH
+6,NC,NearestCentroid,sklearn,BATCH
+7,RF,RandomForest,sklearn,BATCH
+8,SVC,SVC,sklearn,BATCH
+9,XGB,XGBoost,xgboost,BATCH

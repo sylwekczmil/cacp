@@ -8,7 +8,7 @@ from cacp.gui.external.classifier import SKLEARN_CLASSIFIERS
 class SklearnClassifiersTable(html.Div):
     class ids:
         table = lambda aio_id: f"SklearnClassifiersTable-table-{aio_id}"
-        store_id = lambda aio_id: f"SklearnClassifiersTable-store_id-{aio_id}"
+        store = lambda aio_id: f"SklearnClassifiersTable-store-{aio_id}"
 
     ids = ids
 
@@ -24,7 +24,7 @@ class SklearnClassifiersTable(html.Div):
 
         self.store_id = store_id
         if store_id is None:
-            self.store_id = self.ids.store_id(aio_id)
+            self.store_id = self.ids.store(aio_id)
 
         super().__init__([
             dag.AgGrid(

@@ -51,4 +51,4 @@ def test_parse_sklearn_classifier():
         "id": "sklearn.tree._classes.DecisionTreeClassifier",
         "name": "DecisionTreeClassifier",
     })
-    assert classifier.max_depth == 1
+    assert classifier(1, 1).max_depth == 1

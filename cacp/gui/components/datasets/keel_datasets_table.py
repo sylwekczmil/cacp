@@ -11,7 +11,7 @@ from cacp.gui.external.shared.type import class_to_id
 class KeelDatasetsTable(html.Div):
     class ids:
         table = lambda aio_id: f"KeelDatasetsTable-table-{aio_id}"
-        store_id = lambda aio_id: f"KeelDatasetsTable-store_id-{aio_id}"
+        store = lambda aio_id: f"KeelDatasetsTable-store-{aio_id}"
 
     ids = ids
 
@@ -40,7 +40,7 @@ class KeelDatasetsTable(html.Div):
 
         self.store_id = store_id
         if store_id is None:
-            self.store_id = self.ids.store_id(aio_id)
+            self.store_id = self.ids.store(aio_id)
 
         super().__init__([
             dag.AgGrid(

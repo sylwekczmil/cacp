@@ -155,6 +155,17 @@ diskcache = ["diskcache (>=5.2.1)", "multiprocess (>=0.70.12)", "psutil (>=5.8.0
 testing = ["beautifulsoup4 (>=4.8.2)", "cryptography (<3.4)", "dash-testing-stub (>=0.0.2)", "lxml (>=4.6.2)", "multiprocess (>=0.70.12)", "percy (>=2.0.2)", "psutil (>=5.8.0)", "pytest (>=6.0.2)", "requests[security] (>=2.21.0)", "selenium (>=3.141.0,<=4.2.0)", "waitress (>=1.4.4)"]
 
 [[package]]
+name = "dash-ace"
+version = "0.2.1"
+description = "Dash Ace Editor Component"
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "dash_ace-0.2.1.tar.gz", hash = "sha256:e533e150317787eec420c0631dcfbe768613eac1e79ae0a97991a17894d3f30e"},
+]
+
+[[package]]
 name = "dash-ag-grid"
 version = "2.1.0"
 description = "Dash wrapper around AG Grid, the best interactive data grid for the web."
@@ -1577,4 +1588,4 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.0,<3.12"
-content-hash = "16fa4a5c24590ded31ddfff48fbdfda21cbc7e0f765fa3630bd776debf79814d"
+content-hash = "3ab1844044ba8f971b280d6bb7e06df5d880de888933a9084f33ac81702f395b"

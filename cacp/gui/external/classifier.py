@@ -18,11 +18,13 @@ RIVER_CLASSIFIERS = map_classifiers(RiverClassifierModel.all())
 
 
 def parse_classifier(classifier_dict: Dict):
-    classifier_type = cast(Callable, locate(classifier_dict["id"]))
-    # TODO: handle n_inputs, n_classes, check if classifiers has them in __init__
-
-    # TODO error init params are old....
-    return lambda n_inputs, n_classes: classifier_type(**classifier_dict["init_values"])
+    if "code" in classifier_dict:  # custom classifier
+        classifier_type = cast(Callable, locate(classifier_dict["locate_id"], True))
+        return lambda n_inputs, n_classes: classifier_type()
+    else:
+        classifier_type = cast(Callable, locate(classifier_dict["id"]))
+        # TODO: handle n_inputs, n_classes, check if classifiers has them in __init__
+        return lambda n_inputs, n_classes: classifier_type(**classifier_dict["init_values"])
 
 
 def process_classifiers_names(names: list):

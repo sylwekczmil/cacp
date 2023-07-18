@@ -1,8 +1,9 @@
 import dash
 import dash_ag_grid as dag
+import dash_bootstrap_components as dbc
 from dash import html, callback, Output, Input, State, no_update
 
-from cacp.gui.components.shared.utils import location_href_output
+from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.experiments import get_all_experiments, delete_experiment
 
 dash.register_page(__name__, path="/")
@@ -14,6 +15,9 @@ def layout():
     init_experiments = get_all_experiments()
 
     return html.Div([
+        html.Div(
+            [dbc.Button("Create new experiment", href="/experiment-form")],
+            className="d-flex justify-content-end mb-4"),
         html.H5("Experiments"),
         dag.AgGrid(
             id=EXPERIMENTS_TABLE_ID,
@@ -21,7 +25,7 @@ def layout():
             columnDefs=[
                 {"field": "name"},
                 {"field": "type"},
-                {"field": "path", "maxWidth": None},
+                {"field": "path"},
                 {"field": "number of datasets"},
                 {"field": "number of classifiers"},
                 {"field": "status"},
@@ -47,14 +51,14 @@ def layout():
             ],
             defaultColDef={"sortable": True, "filter": True, "resizable": True},
             columnSize="responsiveSizeToFit",
-            style={"height": "90vh"}
+            style={"height": "80vh"}
         ),
     ])
 
 
 @callback(
     Output(EXPERIMENTS_TABLE_ID, "rowData"),
-    location_href_output(),
+    global_location_href_output(),
     Input(EXPERIMENTS_TABLE_ID, "cellRendererData"),
     State(EXPERIMENTS_TABLE_ID, "rowData"),
     prevent_initial_call=True,

@@ -17,6 +17,10 @@ EXPERIMENT_RESULTS_ID = "experiment_results"
 def show_experiment(experiment: Experiment):
     experiment_path = Path(experiment["path"])
     return html.Div([
+        html.H5("Datasets", className="mt-4"),
+        csv_to_grid(experiment_path / "info" / "datasets.csv", skip_first_column=True),
+        html.H5("Classifiers", className="mt-4"),
+        csv_to_grid(experiment_path / "info" / "classifiers.csv", skip_first_column=True),
         html.H5("Comparison results", className="mt-4"),
         csv_to_grid(experiment_path / "comparison_result.csv", skip_first_column=True),
         html.H5("Comparison results winner", className="mt-4"),

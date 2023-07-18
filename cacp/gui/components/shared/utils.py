@@ -26,5 +26,8 @@ def csv_to_grid(path: Path, skip_first_column=False):
     )
 
 
-def location_href_output():
-    return Output("location", "href", allow_duplicate=True)
+def global_location_href_output():
+    return Output(GLOBAL_LOCATION_ID, "href", allow_duplicate=True)
+
+
+GLOBAL_LOCATION_ID = "global_location"
