@@ -1,5 +1,4 @@
 import dataclasses
-import ssl
 import typing
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -13,7 +12,7 @@ import typing_extensions
 from sklearn import preprocessing
 from tqdm import tqdm
 
-BASE_KEEL_URL = 'https://sci2s.ugr.es/keel/dataset/data/classification/'
+BASE_KEEL_DATASETS_URL = 'https://github.com/sylwekczmil/cacp_files/raw/main/'
 
 AVAILABLE_CLASSIFICATION_DATASET_NAMES = typing_extensions.Literal[
     'abalone', 'appendicitis', 'australian', 'automobile', 'balance', 'banana', 'bands',
@@ -283,9 +282,7 @@ class ClassificationDataset(ClassificationDatasetBase):
     def _fetch_file(self, file_name: str) -> Path:
         out_file_path = self._files_cache_path.joinpath(file_name)
         if not out_file_path.exists():
-            url = f'{BASE_KEEL_URL}{file_name}'
-            # KEEL page sometimes fails on ssl cert (we can not fix it)
-            ssl._create_default_https_context = ssl._create_unverified_context
+            url = f'{BASE_KEEL_DATASETS_URL}{file_name}'
             with ClassificationDatasetDownloadProgressBar(unit='B', unit_scale=True, miniters=1,
                                                           desc=f'Downloading {file_name}') as t:
                 urlretrieve(url, filename=out_file_path, reporthook=t.update_to)

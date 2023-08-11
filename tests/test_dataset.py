@@ -88,7 +88,7 @@ def test_dataset_iter(datasets):
     index = 0
     for index, (x, y) in enumerate(ds, 1):
         assert np.issubdtype(type(y), np.integer)
-        assert type(x) == dict
+        assert type(x) is dict
         assert len(x) == 4
         assert list(x.keys()) == [0, 1, 2, 3]
     assert index == 150
