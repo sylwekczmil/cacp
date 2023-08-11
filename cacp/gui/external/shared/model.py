@@ -7,7 +7,7 @@ from typing import TypeVar, Generic, List
 from pydantic import BaseModel
 
 from cacp.gui.external.shared.schema import type_to_pseudo_pydantic_model
-from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, class_to_id
+from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, to_id
 
 T = TypeVar("T")
 
@@ -65,10 +65,10 @@ class ClassModel(BaseAppModel, Generic[T]):
         for sub_class in get_all_non_abstract_subclasses(cls.base_class()):
             try:
                 model: T = cls.from_class(sub_class)
-                _id = class_to_id(sub_class)
+                _id = to_id(sub_class)
                 model.id = _id
                 result[_id] = model
-            except Exception as e:
+            except Exception:
                 # do not add those that can not be initialized
                 pass
         return result

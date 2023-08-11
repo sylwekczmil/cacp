@@ -11,10 +11,10 @@ readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = ">=3.8.0,<3.12"
-dash = {extras = ["diskcache"], version = "^2.10.2"}
-dash-bootstrap-components = "^1.4.1"
+dash = {version = "^2.11.1", extras = ["diskcache"]}
+dash-bootstrap-components = "^1.4.2"
 dash-rjsf = "^0.0.4"
-dash-ag-grid = "^2.1.0"
+dash-ag-grid = "^2.3.0"
 dash-ace = "^0.2.1"
 Jinja2 = "^3.0.3"
 joblib = "^1.1.0"

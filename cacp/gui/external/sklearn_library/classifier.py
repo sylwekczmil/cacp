@@ -6,7 +6,7 @@ from sklearn.base import ClassifierMixin
 from sklearn.utils import all_estimators
 
 from cacp.gui.external.shared.model import ClassModel, T
-from cacp.gui.external.shared.type import class_to_id
+from cacp.gui.external.shared.type import to_id
 
 
 class SklearnClassifierModel(ClassModel):
@@ -19,7 +19,7 @@ class SklearnClassifierModel(ClassModel):
 
     @classmethod
     def from_class(cls, source_class: Type) -> "SklearnClassifierModel":
-        _id = class_to_id(source_class)
+        _id = to_id(source_class)
         docs_version_split = str(sklearn.__version__).split(".")
         docs_version = f"{docs_version_split[0]}.{docs_version_split[1]}"
         docs_split = _id.split(".")

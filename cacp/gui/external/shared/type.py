@@ -1,9 +1,9 @@
 from inspect import isabstract
-from typing import Type
+from typing import Type, Callable, Union
 
 
-def class_to_id(cls: Type):
-    return cls.__module__ + "." + cls.__name__
+def to_id(value: Union[Type, Callable]):
+    return value.__module__ + "." + value.__name__
 
 
 def get_all_subclasses(cls: Type):

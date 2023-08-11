@@ -26,6 +26,7 @@ class Experiment(TypedDict):
     name: str
     datasets: List[Dict]
     classifiers: List[Dict]
+    metrics: List[Dict]
     type: ExperimentType
     status: ExperimentStatus
     created_at: float
@@ -52,13 +53,15 @@ def get_experiment(experiment_id: int) -> Experiment:
 
 
 def add_experiment(
-    name_value: str, type_value: ExperimentType, selected_datasets: List[dict], selected_classifiers: List[dict]
+    name_value: str, type_value: ExperimentType, selected_datasets: List[Dict], selected_classifiers: List[Dict],
+    selected_metrics: List[Dict]
 ) -> int:
     new_experiment: Experiment = dict()
     new_experiment["name"] = name_value
     new_experiment["type"] = type_value
     new_experiment["datasets"] = selected_datasets
     new_experiment["classifiers"] = selected_classifiers
+    new_experiment["metrics"] = selected_metrics
     new_experiment["status"] = ExperimentStatus.RUNNING
     new_experiment["created_at"] = datetime.now().timestamp()
     experiment_id = EXPERIMENTS_DB.insert(new_experiment)

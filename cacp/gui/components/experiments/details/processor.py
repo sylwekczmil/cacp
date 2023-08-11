@@ -6,8 +6,10 @@ from dash import html, Output, callback, Input, no_update
 from cacp import run_experiment, run_incremental_experiment
 from cacp.gui.components.shared.utils import GLOBAL_LOCATION_ID
 from cacp.gui.db.experiments import get_experiment, ExperimentStatus, ExperimentType, update_experiment_status
-from cacp.gui.external.classifier import process_classifiers_names, parse_classifier
+from cacp.gui.external.classifier import parse_classifier
 from cacp.gui.external.dataset import parse_dataset
+from cacp.gui.external.metric import parse_metric
+from cacp.gui.external.shared.helpers import process_unique_names
 
 
 def make_progress_graph(progress: int, total: int):
@@ -28,21 +30,21 @@ class ExperimentProcessor(html.Div):
         experiment_store_id
     ):
 
-        self.experiment_processor_progres_id = "experiment_processor_progres"
+        self.experiment_processor_progress_id = "experiment_processor_progress"
         super().__init__([
-            html.Div(make_progress_graph(0, 0), id=self.experiment_processor_progres_id)
+            html.Div(make_progress_graph(0, 0), id=self.experiment_processor_progress_id)
         ])
 
-        # TODO: cancell job on page change
+        # TODO: cancel job on page change
         @callback(
             Output(experiment_store_id, "data"),
             Input(GLOBAL_LOCATION_ID, "pathname"),
             prevent_initial_call=False,
             background=True,
             running=[
-                (Output(self.experiment_processor_progres_id, "children"), make_progress_graph(0, 0), []),
+                (Output(self.experiment_processor_progress_id, "children"), make_progress_graph(0, 0), []),
             ],
-            progress=Output(self.experiment_processor_progres_id, "children"),
+            progress=Output(self.experiment_processor_progress_id, "children"),
         )
         def on_page_load(set_progress, pathname: str):
             result = no_update
@@ -50,29 +52,38 @@ class ExperimentProcessor(html.Div):
             if len(path_split) > 2:
                 experiment_id = int(path_split[2])
                 experiment = get_experiment(experiment_id)
-                if experiment and experiment["status"] == ExperimentStatus.RUNNING:
+                if experiment:  # TODO and experiment["status"] == ExperimentStatus.RUNNING:
                     try:
                         def progress(p: int, t: int):
                             set_progress(make_progress_graph(p, t))
 
-                        classifier_names = process_classifiers_names(
+                        classifier_names = process_unique_names(
                             [c["name"] for c in experiment["classifiers"]]
                         )
+                        classifiers = list(
+                            zip(classifier_names, [parse_classifier(c) for c in experiment["classifiers"]]))
+                        datasets = [parse_dataset(d) for d in experiment["datasets"]]
+                        metric_names = process_unique_names(
+                            [m["name"] for m in experiment["metrics"]]
+                        )
+                        metrics = list(zip(metric_names, [parse_metric(m) for m in experiment["metrics"]]))
                         experiment_type = experiment["type"]
                         if experiment_type == ExperimentType.BATCH:
                             update_experiment_status(experiment_id, ExperimentStatus.RUNNING)
                             run_experiment(
-                                [parse_dataset(d) for d in experiment["datasets"]],
-                                list(zip(classifier_names, [parse_classifier(c) for c in experiment["classifiers"]])),
+                                datasets,
+                                classifiers,
                                 experiment["path"],
+                                metrics,
                                 progress=progress,
                             )
                         elif experiment_type == ExperimentType.INCREMENTAL:
                             update_experiment_status(experiment_id, ExperimentStatus.RUNNING)
                             run_incremental_experiment(
-                                [parse_dataset(d) for d in experiment["datasets"]],
-                                list(zip(classifier_names, [parse_classifier(c) for c in experiment["classifiers"]])),
+                                datasets,
+                                classifiers,
                                 experiment["path"],
+                                metrics,
                                 progress=progress,
                             )
                         update_experiment_status(experiment_id, ExperimentStatus.FINISHED)

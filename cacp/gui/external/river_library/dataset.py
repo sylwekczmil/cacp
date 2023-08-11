@@ -5,7 +5,7 @@ import river
 from river.datasets.base import Dataset, SyntheticDataset
 
 from cacp.gui.external.shared.model import ClassModel
-from cacp.gui.external.shared.type import class_to_id
+from cacp.gui.external.shared.type import to_id
 
 
 class RiverDataSetType(str, Enum):
@@ -56,7 +56,7 @@ class RiverDatasetModel(ClassModel):
             classes = 2
 
         return cls(
-            id=class_to_id(source_class),
+            id=to_id(source_class),
             name=dataset_name,
             type=dataset_type,
             task=dataset_repr.get("Task"),

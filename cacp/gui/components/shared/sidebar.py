@@ -25,9 +25,9 @@ def sidebar_component():
                     ),
                 ]),
                 dbc.Button("Create new experiment", href="/experiment-form"),
+                html.Script("runNavLinksRoutine()"),
             ],
                 className="d-flex justify-content-between flex-column h-100"),
-
         ],
         style={
             "position": "fixed",
@@ -36,6 +36,6 @@ def sidebar_component():
             "bottom": 0,
             "width": "16rem",
             "padding": "2rem 1rem",
-            "background-color": "#f8f9fa",
+            "backgroundColor": "#f8f9fa",
         }
     )

@@ -208,10 +208,11 @@ def process_incremental_comparison_single(classifier_factory, classifier_name,
             # update the metrics
             if y_pred != {} and y_pred is not None:
                 metric.update(y_true=y, y_pred=y_pred)
+                y_pred = max(y_pred, key=y_pred.get) if type(y_pred) is dict else y_pred
                 record = {
                     'index': i,
                     'y_true': y,
-                    'y_pred': max(y_pred, key=y_pred.get)
+                    'y_pred': y_pred
                 }
                 for metric_idx, (metric_name, _) in enumerate(metrics):
                     record[metric_name] = metric.data[metric_idx].get()

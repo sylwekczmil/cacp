@@ -6,7 +6,7 @@ from functools import lru_cache, cached_property
 from inspect import signature, Parameter, isabstract
 from pydoc import locate
 from typing import (
-    Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union, get_args
+    Deque, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union, get_args, Callable
 )
 from typing import Type, get_origin
 
@@ -17,7 +17,7 @@ from river.datasets.base import Dataset
 from river.metrics.base import Metric
 from river.optim.base import Initializer, Scheduler, Optimizer
 
-from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, is_primitive_type, class_to_id
+from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, is_primitive_type, to_id
 
 NONE_TYPE = type(None)
 SEARCHABLE = [
@@ -86,7 +86,7 @@ class SearchableToPydanticMapper(ToPydanticMapper):
         if not subclasses:
             subclasses.append(annotation)
         pseudo_subclasses = [
-            new_pseudo_pydantic_model(f"{class_to_id(x)}__{uuid.uuid4().hex}") for x in
+            new_pseudo_pydantic_model(f"{to_id(x)}__{uuid.uuid4().hex}") for x in
             subclasses
         ]
         p_annotation = Union[tuple(pseudo_subclasses)]
@@ -216,6 +216,31 @@ def new_pseudo_pydantic_model(name: str):
 
     Model.__name__ = name
     return Model
+
+
+@lru_cache
+def function_to_pseudo_pydantic_model(function: Callable):
+    model = new_pseudo_pydantic_model(function.__name__)
+    sig = signature(function)
+    parameters: List[Parameter] = list(sig.parameters.values())
+    for parameter in parameters:
+        if parameter.annotation == parameter.empty and parameter.default != parameter.empty:
+            potential_annotation_type = type(parameter.default)
+            if is_primitive_type(potential_annotation_type):
+                parameter._annotation = potential_annotation_type
+        if parameter.annotation != parameter.empty:
+            for mapper_class in MAPPER_CLASSES:
+                mapper = mapper_class(parameter)
+                if mapper.can_map():
+                    field = mapper.map()
+                    if field:
+                        model.__fields__[parameter.name] = field
+                    break
+        else:
+            field = DocToPydanticMapper.map(function, parameter)
+            if field:
+                model.__fields__[parameter.name] = field
+    return model
 
 
 @lru_cache

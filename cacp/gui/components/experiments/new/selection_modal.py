@@ -53,7 +53,7 @@ class SelectionModal(html.Span):
                             schema={
                             },
                             uiSchema={SUBMIT_BUTTON_OPTIONS_NAME: {
-                                "submitText": "Submit",
+                                "submitText": "Add",
                                 "norender": False,
                                 "props": {
                                     "disabled": False,

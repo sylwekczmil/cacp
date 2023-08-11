@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 import dash_bootstrap_components as dbc
 from dash import html, Output, callback, Input, State, ctx, no_update
 
@@ -8,7 +10,10 @@ from cacp.gui.components.datasets.keel_datasets_table import KeelDatasetsTable
 from cacp.gui.components.datasets.river_datasets_table import RiverDatasetsTable
 from cacp.gui.components.experiments.new.selected_classifiers_table import SelectedClassifiersTable
 from cacp.gui.components.experiments.new.selected_datasets_table import SelectedDatasetsTable
+from cacp.gui.components.experiments.new.selected_metrics_table import SelectedMetricsTable
 from cacp.gui.components.experiments.new.selection_modal import SelectionModal
+from cacp.gui.components.metrics.river_metrics_table import RiverMetricsTable
+from cacp.gui.components.metrics.sklearn_metrics_table import SklearnMetricsTable
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.experiments import ExperimentType, add_experiment
 
@@ -20,6 +25,7 @@ class NewExperimentForm(html.Div):
         type_input = lambda aio_id: f"NewExperimentForm-type_input-{aio_id}"
         selected_datasets_store = lambda aio_id: f"NewExperimentForm-selected_datasets_store-{aio_id}"
         selected_classifiers_store = lambda aio_id: f"NewExperimentForm-selected_classifiers_store-{aio_id}"
+        selected_metrics_store = lambda aio_id: f"NewExperimentForm-selected_metrics_store-{aio_id}"
         toast = lambda aio_id: f"NewExperimentForm-toast-{aio_id}"
         create_button = lambda aio_id: f"NewExperimentForm-create_button-{aio_id}"
 
@@ -79,11 +85,27 @@ class NewExperimentForm(html.Div):
             "Add Sklearn classifier", SklearnClassifiersTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-sc"
         )
+        river_metrics_selection = SelectionModal(
+            "Add River metric", RiverMetricsTable,
+            button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rm"
+        )
+        sklearn_metrics_selection = SelectionModal(
+            "Add Sklearn metric", SklearnMetricsTable,
+            button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-sm"
+        )
 
-        selected_datasets_table = SelectedDatasetsTable(store_id=self.ids.selected_datasets_store(aio_id),
-                                                        aio_id=aio_id)
-        selected_classifiers_table = SelectedClassifiersTable(store_id=self.ids.selected_classifiers_store(aio_id),
-                                                              aio_id=aio_id)
+        selected_datasets_table = SelectedDatasetsTable(
+            store_id=self.ids.selected_datasets_store(aio_id),
+            aio_id=aio_id
+        )
+        selected_classifiers_table = SelectedClassifiersTable(
+            store_id=self.ids.selected_classifiers_store(aio_id),
+            aio_id=aio_id
+        )
+        selected_metrics_table = SelectedMetricsTable(
+            store_id=self.ids.selected_metrics_store(aio_id),
+            aio_id=aio_id
+        )
 
         super().__init__([
             html.Div([
@@ -103,6 +125,13 @@ class NewExperimentForm(html.Div):
                 html.Br(),
                 html.H5("Selected classifiers"),
                 selected_classifiers_table,
+                html.Br(),
+                html.Div([
+                    sklearn_metrics_selection, river_metrics_selection,
+                ]),
+                html.Br(),
+                html.H5("Selected metrics"),
+                selected_metrics_table,
                 html.Div([
                     dbc.Button(
                         "Create", id=self.ids.create_button(aio_id), className="mt-3", n_clicks=0
@@ -130,6 +159,14 @@ class NewExperimentForm(html.Div):
             return "mx-2" if type_value == ExperimentType.BATCH else "d-none"
 
         @callback(
+            Output(sklearn_metrics_selection.ids.modal_open_button(sklearn_metrics_selection.aio_id),
+                   "className"),
+            Input(self.ids.type_input(aio_id), "value"),
+        )
+        def update_sklearn_classifiers_button_class(type_value):
+            return "mx-2" if type_value == ExperimentType.BATCH else "d-none"
+
+        @callback(
             Output(river_classifiers_selection.ids.modal_open_button(river_classifiers_selection.aio_id), "className"),
             Input(self.ids.type_input(aio_id), "value"),
         )
@@ -141,6 +178,13 @@ class NewExperimentForm(html.Div):
             Input(self.ids.type_input(aio_id), "value"),
         )
         def update_river_datasets_button_class(type_value):
+            return "mx-2" if type_value == ExperimentType.INCREMENTAL else "d-none"
+
+        @callback(
+            Output(river_metrics_selection.ids.modal_open_button(river_metrics_selection.aio_id), "className"),
+            Input(self.ids.type_input(aio_id), "value"),
+        )
+        def update_river_metrics_button_class(type_value):
             return "mx-2" if type_value == ExperimentType.INCREMENTAL else "d-none"
 
         @callback(
@@ -163,7 +207,7 @@ class NewExperimentForm(html.Div):
             if ctx.triggered_id == self.ids.type_input(aio_id):
                 return []
             elif ctx.triggered_id == custom_classifiers_selection.store_id and selected_custom_classifier_data:
-                return prev_data + selected_custom_classifier_data
+                return prev_data + [cc for cc in selected_custom_classifier_data if cc["type"] == _type_value]
             elif ctx.triggered_id == sklearn_classifiers_selection.store_id and selected_sklearn_classifier_data:
                 return prev_data + selected_sklearn_classifier_data
             elif ctx.triggered_id == river_classifiers_selection.store_id and selected_river_classifier_data:
@@ -201,6 +245,33 @@ class NewExperimentForm(html.Div):
             return no_update
 
         @callback(
+            Output(self.ids.selected_metrics_store(aio_id), "data"),
+            Input(sklearn_metrics_selection.store_id, "data"),
+            Input(river_metrics_selection.store_id, "data"),
+            Input(selected_metrics_table.ids.table(selected_metrics_table.aio_id), "cellRendererData"),
+            Input(self.ids.type_input(aio_id), "value"),
+            State(self.ids.selected_metrics_store(aio_id), "data")
+        )
+        def selected_dataset(
+            selected_sklearn_metric_data: list,
+            selected_river_metric_data: list,
+            cell_renderer_data: dict,
+            _type_value: ExperimentType,
+            prev_data: list
+        ):
+
+            if ctx.triggered_id == self.ids.type_input(aio_id):
+                return []
+            elif ctx.triggered_id == sklearn_metrics_selection.store_id and selected_sklearn_metric_data:
+                return prev_data + selected_sklearn_metric_data
+            elif ctx.triggered_id == river_metrics_selection.store_id and selected_river_metric_data:
+                return prev_data + selected_river_metric_data
+            elif ctx.triggered_id == selected_metrics_table.ids.table(selected_metrics_table.aio_id):
+                del prev_data[cell_renderer_data["rowIndex"]]
+                return prev_data
+            return no_update
+
+        @callback(
             global_location_href_output(),
             Output(self.ids.toast(aio_id), "children"),
             Output(self.ids.toast(aio_id), "is_open"),
@@ -209,10 +280,12 @@ class NewExperimentForm(html.Div):
             State(self.ids.type_input(aio_id), "value"),
             State(self.ids.selected_datasets_store(aio_id), "data"),
             State(self.ids.selected_classifiers_store(aio_id), "data"),
+            State(self.ids.selected_metrics_store(aio_id), "data"),
             prevent_initial_call=True,
         )
         def run_experiment_button(
-            n_clicks, name_value: str, type_value: ExperimentType, selected_datasets, selected_classifiers
+            n_clicks, name_value: str, type_value: ExperimentType, selected_datasets: List[Dict],
+            selected_classifiers: List[Dict], selected_metrics: List[Dict]
         ):
             href, toast_message, toast_is_open, = no_update, "", False
             if n_clicks:
@@ -227,6 +300,7 @@ class NewExperimentForm(html.Div):
                     toast_message = dbc.Alert([html.Div(e) for e in errors], color="danger")
                     toast_is_open = True
                 else:
-                    experiment_id = add_experiment(name_value, type_value, selected_datasets, selected_classifiers)
+                    experiment_id = add_experiment(name_value, type_value, selected_datasets, selected_classifiers,
+                                                   selected_metrics)
                     href = f"/experiment/{experiment_id}"
             return href, toast_message, toast_is_open

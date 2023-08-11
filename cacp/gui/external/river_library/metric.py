@@ -1,19 +1,19 @@
 from typing import Type
 
 import river
-from river.base import Classifier
+from river.metrics.base import ClassificationMetric
 
 from cacp.gui.external.shared.model import ClassModel
 from cacp.gui.external.shared.type import to_id
 
 
-class RiverClassifierModel(ClassModel):
+class RiverMetricModel(ClassModel):
     name: str
     docs_url: str
 
     @classmethod
     def base_class(cls):
-        return Classifier
+        return ClassificationMetric
 
     @classmethod
     def from_class(cls, source_class: Type) -> "RiverClassifierModel":
@@ -26,3 +26,8 @@ class RiverClassifierModel(ClassModel):
             name=source_class.__name__,
             docs_url=f"https://riverml.xyz/{docs_version}/api/{docs_split[1].replace('_', '-')}/{docs_name}/"
         )
+
+
+if __name__ == '__main__':
+    me = RiverMetricModel.all()
+    print(me)

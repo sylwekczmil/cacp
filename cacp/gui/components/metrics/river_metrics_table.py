@@ -1,36 +1,20 @@
 import dash_ag_grid as dag
-import pandas as pd
-from dash import html, callback, Input, Output
+from dash import html, callback, Output, Input
 from dash.dcc import Store
 
-from cacp import ClassificationDataset
-from cacp.gui.assets import ASSETS_PATH
-from cacp.gui.external.shared.type import to_id
+from cacp.gui.external.metric import RIVER_METRICS
 
 
-class KeelDatasetsTable(html.Div):
+class RiverMetricsTable(html.Div):
     class ids:
-        table = lambda aio_id: f"KeelDatasetsTable-table-{aio_id}"
-        store = lambda aio_id: f"KeelDatasetsTable-store-{aio_id}"
+        table = lambda aio_id: f"RiverMetricsTable-table-{aio_id}"
+        store = lambda aio_id: f"RiverMetricsTable-store-{aio_id}"
 
     ids = ids
 
     @property
     def data(self):
-        return [
-            {**r, "docs_url": f"[{r['docs_url']}]({r['docs_url']})"} for r in [
-                {**r,
-                 "docs_url": f"https://sci2s.ugr.es/keel/dataset/data/classification/{r['Name']}-names.txt",
-                 "json_schema": {
-                     "title": r["Name"],
-                     "type": "object",
-                     "properties": {
-                     }
-                 },
-                 "id": to_id(ClassificationDataset)
-                 } for r in pd.read_csv(ASSETS_PATH.joinpath("datasets.csv")).to_dict("records")
-            ]
-        ]
+        return RIVER_METRICS
 
     def __init__(
         self,
@@ -48,11 +32,9 @@ class KeelDatasetsTable(html.Div):
                 rowData=self.data,
                 columnDefs=[
                     {"field": "#", "headerName": "#", "maxWidth": 100, "checkboxSelection": bool(store_id)},
-                    {"field": "Name", "headerName": "Name"},
+                    {"field": "name", "headerName": "Name"},
                     {"field": "docs_url", "cellRenderer": "markdown", "headerName": "Docs", "maxWidth": None},
-                    {"field": "Instances"},
-                    {"field": "Features"},
-                    {"field": "Classes"},
+                    {"field": "id", "cellRenderer": "markdown", "headerName": "Python path", "maxWidth": None},
                 ],
                 defaultColDef={"maxWidth": 160, "sortable": True, "filter": True, "resizable": True},
                 dashGridOptions={"rowSelection": "single"} if store_id else None,
