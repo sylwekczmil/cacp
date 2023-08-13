@@ -12,7 +12,7 @@ from tinydb.table import Document
 from cacp import ClassificationDataset
 from cacp.comparison import process_comparison_single, DEFAULT_METRICS, process_incremental_comparison_single, \
     DEFAULT_INCREMENTAL_METRICS
-from cacp.gui.custom_classifiers import CUSTOM_CLASSIFIERS_CODE_DIR
+from cacp.gui.custom.classifiers import CUSTOM_CLASSIFIERS_CODE_DIR
 from cacp.gui.db import DB_PATH
 from cacp.gui.external.classifier import parse_classifier
 
@@ -32,8 +32,7 @@ class CustomClassifier(TypedDict):
 
 
 CUSTOM_CLASSIFIERS_DB = TinyDB(DB_PATH / "custom_classifiers.json")
-CUSTOM_CLASSIFIERS_PATH = (DB_PATH / "custom_classifiers").resolve()
-CUSTOM_BATCH_CODE_TEMPLATE = """import numpy as np
+CUSTOM_CLASSIFIER_BATCH_CODE_TEMPLATE = """import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 
@@ -61,7 +60,7 @@ class Classifier{}(BaseEstimator, ClassifierMixin): # do not change class declar
         return np.full(len(X), self.class_value)
 
 """
-CUSTOM_INCREMENTAL_CODE_TEMPLATE = """import typing
+CUSTOM_INCREMENTAL_CLASSIFIER_CODE_TEMPLATE = """import typing
 
 from river import base
 
@@ -108,7 +107,7 @@ def _convert_from_document_to_custom_classifier(custom_classifier: Document) -> 
 def _locate_id(custom_classifier_id: int, original_custom_classifier_id: typing.Optional[int] = None):
     if original_custom_classifier_id is None:
         original_custom_classifier_id = custom_classifier_id
-    return f"cacp.gui.custom_classifiers.classifier{custom_classifier_id}.Classifier{original_custom_classifier_id}"
+    return f"cacp.gui.custom.classifiers.classifier{custom_classifier_id}.Classifier{original_custom_classifier_id}"
 
 
 def _code_path(custom_classifier_id: int) -> Path:
@@ -138,7 +137,7 @@ def add_custom_classifier() -> int:
     new_custom_classifier_id = 1 if len(all_classifiers) == 0 else all_classifiers[-1].doc_id + 1
     new_custom_classifier["name"] = f"Custom Classifier {new_custom_classifier_id}"
     new_custom_classifier["type"] = CustomClassifierType.BATCH
-    new_custom_classifier["code"] = CUSTOM_BATCH_CODE_TEMPLATE.format(new_custom_classifier_id)
+    new_custom_classifier["code"] = CUSTOM_CLASSIFIER_BATCH_CODE_TEMPLATE.format(new_custom_classifier_id)
     new_custom_classifier["locate_id"] = _locate_id(new_custom_classifier_id)
     new_custom_classifier["created_at"] = datetime.now().timestamp()
     _save_code(new_custom_classifier_id, new_custom_classifier["code"])

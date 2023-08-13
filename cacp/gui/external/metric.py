@@ -14,7 +14,10 @@ def map_metric(metrics: list):
 
 
 def parse_metric(metric_dict: Dict):
-    return cast(Callable, locate(metric_dict["id"]))
+    if "code" in metric_dict:  # custom metric
+        return cast(Callable, locate(metric_dict["locate_id"], True))
+    else:
+        return cast(Callable, locate(metric_dict["id"]))
 
 
 SKLEARN_METRICS = map_metric(SklearnMetricModel.all())
