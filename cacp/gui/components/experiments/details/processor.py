@@ -35,16 +35,13 @@ class ExperimentProcessor(html.Div):
             html.Div(make_progress_graph(0, 0), id=self.experiment_processor_progress_id)
         ])
 
-        # TODO: cancel job on page change
         @callback(
             Output(experiment_store_id, "data"),
             Input(GLOBAL_LOCATION_ID, "pathname"),
             prevent_initial_call=False,
             background=True,
-            running=[
-                (Output(self.experiment_processor_progress_id, "children"), make_progress_graph(0, 0), []),
-            ],
             progress=Output(self.experiment_processor_progress_id, "children"),
+            cancel=[Input(GLOBAL_LOCATION_ID, "href")],
         )
         def on_page_load(set_progress, pathname: str):
             result = no_update
@@ -52,8 +49,9 @@ class ExperimentProcessor(html.Div):
             if len(path_split) > 2:
                 experiment_id = int(path_split[2])
                 experiment = get_experiment(experiment_id)
-                if experiment:  # TODO and experiment["status"] == ExperimentStatus.RUNNING:
+                if experiment and experiment["status"] == ExperimentStatus.RUNNING:
                     try:
+
                         def progress(p: int, t: int):
                             set_progress(make_progress_graph(p, t))
 
@@ -93,4 +91,5 @@ class ExperimentProcessor(html.Div):
 
                     result = get_experiment(experiment_id)
 
+            set_progress("")
             return result
