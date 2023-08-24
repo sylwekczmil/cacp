@@ -13,6 +13,10 @@ class CustomClassifiersTable(html.Div):
 
     ids = ids
 
+    @property
+    def data(self):
+        return get_all_custom_classifiers()
+
     def __init__(
         self,
         aio_id,
@@ -26,7 +30,7 @@ class CustomClassifiersTable(html.Div):
         super().__init__([
             dag.AgGrid(
                 id=self.table_id,
-                rowData=[],
+                rowData=self.data,
                 columnDefs=[
                     {"field": "id", "headerName": "#", "maxWidth": 100, "checkboxSelection": bool(store_id)},
                     {"field": "name", "maxWidth": None},

@@ -12,6 +12,7 @@ from cacp.gui.components.experiments.new.selected_classifiers_table import Selec
 from cacp.gui.components.experiments.new.selected_datasets_table import SelectedDatasetsTable
 from cacp.gui.components.experiments.new.selected_metrics_table import SelectedMetricsTable
 from cacp.gui.components.experiments.new.selection_modal import SelectionModal
+from cacp.gui.components.metrics.custom_metrics_table import CustomMetricsTable
 from cacp.gui.components.metrics.river_metrics_table import RiverMetricsTable
 from cacp.gui.components.metrics.sklearn_metrics_table import SklearnMetricsTable
 from cacp.gui.components.shared.utils import global_location_href_output
@@ -85,6 +86,9 @@ class NewExperimentForm(html.Div):
             "Add Sklearn classifier", SklearnClassifiersTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-sc"
         )
+        custom_metrics_selection = SelectionModal(
+            "Add custom metric", CustomMetricsTable, aio_id=f"{aio_id}-cm"
+        )
         river_metrics_selection = SelectionModal(
             "Add River metric", RiverMetricsTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rm"
@@ -127,7 +131,7 @@ class NewExperimentForm(html.Div):
                 selected_classifiers_table,
                 html.Br(),
                 html.Div([
-                    sklearn_metrics_selection, river_metrics_selection,
+                    custom_metrics_selection, sklearn_metrics_selection, river_metrics_selection,
                 ]),
                 html.Br(),
                 html.H5("Selected metrics"),
@@ -246,13 +250,15 @@ class NewExperimentForm(html.Div):
 
         @callback(
             Output(self.ids.selected_metrics_store(aio_id), "data"),
+            Input(custom_metrics_selection.store_id, "data"),
             Input(sklearn_metrics_selection.store_id, "data"),
             Input(river_metrics_selection.store_id, "data"),
             Input(selected_metrics_table.ids.table(selected_metrics_table.aio_id), "cellRendererData"),
             Input(self.ids.type_input(aio_id), "value"),
             State(self.ids.selected_metrics_store(aio_id), "data")
         )
-        def selected_dataset(
+        def selected_metric(
+            selected_custom_metric_data: list,
             selected_sklearn_metric_data: list,
             selected_river_metric_data: list,
             cell_renderer_data: dict,
@@ -262,6 +268,8 @@ class NewExperimentForm(html.Div):
 
             if ctx.triggered_id == self.ids.type_input(aio_id):
                 return []
+            elif ctx.triggered_id == custom_metrics_selection.store_id and selected_custom_metric_data:
+                return prev_data + selected_custom_metric_data
             elif ctx.triggered_id == sklearn_metrics_selection.store_id and selected_sklearn_metric_data:
                 return prev_data + selected_sklearn_metric_data
             elif ctx.triggered_id == river_metrics_selection.store_id and selected_river_metric_data:
@@ -296,6 +304,8 @@ class NewExperimentForm(html.Div):
                     errors.append("At least 1 dataset need to be selected.")
                 if len(selected_classifiers) < 2:
                     errors.append("At least 2 classifiers need to be selected.")
+                if len(selected_metrics) == 0:
+                    errors.append("At least 1 metric need to be selected.")
                 if errors:
                     toast_message = dbc.Alert([html.Div(e) for e in errors], color="danger")
                     toast_is_open = True
