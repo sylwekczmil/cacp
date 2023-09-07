@@ -27,7 +27,7 @@ def layout(custom_metric_id=None):
             dbc.Label("Name", html_for=CUSTOM_METRIC_NAME_ID),
             dbc.Input(id=CUSTOM_METRIC_NAME_ID, placeholder="Enter name", value=custom_metric.get("name")),
             dbc.FormText(
-                "Provide name for your experiment, it should be unique.",
+                "Provide name for your metric, it should be unique.",
                 color="secondary",
             ),
         ],

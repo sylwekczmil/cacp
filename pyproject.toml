@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cacp"
-version = "0.3.1"
+version = "1.0.0a2"
 description = ""
 authors = [
     "Sylwester Czmil <sylwekczmil@gmail.com>",
@@ -10,7 +10,7 @@ authors = [
 readme = "README.rst"
 
 [tool.poetry.dependencies]
-python = ">=3.8.0,<3.12"
+python = ">=3.8.0,<4.0"
 dash = {version = "^2.11.1", extras = ["diskcache"]}
 dash-bootstrap-components = "^1.4.2"
 dash-rjsf = "^0.0.4"

@@ -61,7 +61,7 @@ class SelectionModal(html.Span):
                                 }
                             }}
                         )
-                    ]),
+                    ], className="selection-modal-body"),
                     Store(id=self.store_id)
                 ],
                 id=self.ids.modal(aio_id),

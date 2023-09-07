@@ -11,7 +11,7 @@ dashAgGridComponentFunctions.Button = function (props) {
         "button",
         {
             onClick: onClick,
-            className: buttonClassName
+            className: buttonClassName + " dash-ag-grid-table-button"
         },
         buttonName, " ", React.createElement("i", {className: iconClassName}, "")
     );

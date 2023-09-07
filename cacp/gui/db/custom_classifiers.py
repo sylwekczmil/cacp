@@ -13,7 +13,6 @@ from cacp import ClassificationDataset
 from cacp.comparison import process_comparison_single, DEFAULT_METRICS, process_incremental_comparison_single, \
     DEFAULT_INCREMENTAL_METRICS
 from cacp.gui.custom.classifiers import CUSTOM_CLASSIFIERS_CODE_DIR
-from cacp.gui.db import DB_PATH
 from cacp.gui.external.classifier import parse_classifier
 
 
@@ -31,7 +30,7 @@ class CustomClassifier(TypedDict):
     created_at: float
 
 
-CUSTOM_CLASSIFIERS_DB = TinyDB(DB_PATH / "custom_classifiers.json")
+CUSTOM_CLASSIFIERS_DB = TinyDB(CUSTOM_CLASSIFIERS_CODE_DIR / "custom_classifiers.json")
 CUSTOM_CLASSIFIER_BATCH_CODE_TEMPLATE = """import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
@@ -120,11 +119,11 @@ def _save_code(custom_classifier_id: int, code: str):
 
 
 def _remove_code(custom_classifier_id: int):
-    _code_path(custom_classifier_id).unlink(missing_ok=False)
+    _code_path(custom_classifier_id).unlink(missing_ok=True)
 
 
 def get_all_custom_classifiers() -> List[CustomClassifier]:
-    return [_convert_from_document_to_custom_classifier(e) for e in CUSTOM_CLASSIFIERS_DB.all()]
+    return [_convert_from_document_to_custom_classifier(e) for e in CUSTOM_CLASSIFIERS_DB.all() if e is not None]
 
 
 def get_custom_classifier(custom_classifier_id: int) -> CustomClassifier:

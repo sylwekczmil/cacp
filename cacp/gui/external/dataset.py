@@ -5,8 +5,16 @@ from cacp import ClassificationDataset
 
 
 def parse_dataset(dataset_dict: Dict):
-    if dataset_dict["id"] == "cacp.dataset.ClassificationDataset":
-        return ClassificationDataset(dataset_dict["Name"])
+    ds = None
+    if "code" in dataset_dict:  # custom dataset
+        dataset_type = cast(Callable, locate(dataset_dict["locate_id"]))
+        ds = dataset_type()
+    elif dataset_dict["id"] == "cacp.dataset.ClassificationDataset":
+        ds = ClassificationDataset(dataset_dict["Name"])
     else:
         dataset_type = cast(Callable, locate(dataset_dict["id"]))
-        return dataset_type(**dataset_dict["init_values"])
+        ds = dataset_type(**dataset_dict["init_values"])
+
+    if not hasattr(ds, "name"):
+        ds.name = dataset_dict.get("name", type(ds))
+    return ds

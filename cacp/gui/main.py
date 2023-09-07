@@ -46,4 +46,4 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
 
 
 if __name__ == "__main__":
-    start(debug=True, host="127.0.0.1", port=8050)
+    start(debug=False, host="127.0.0.1", port=8050)

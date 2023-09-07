@@ -15,7 +15,6 @@ from tinydb.table import Document
 from cacp import ClassificationDataset
 from cacp.comparison import process_comparison_single, process_incremental_comparison_single
 from cacp.gui.custom.metrics import CUSTOM_METRICS_CODE_DIR
-from cacp.gui.db import DB_PATH
 from cacp.gui.external.metric import parse_metric
 from cacp.util import accuracy
 
@@ -34,7 +33,7 @@ class CustomMetric(TypedDict):
     created_at: float
 
 
-CUSTOM_METRICS_DB = TinyDB(DB_PATH / "custom_metrics.json")
+CUSTOM_METRICS_DB = TinyDB(CUSTOM_METRICS_CODE_DIR / "custom_metrics.json")
 CUSTOM_METRIC_BATCH_CODE_TEMPLATE = """import numpy as np
 
 
@@ -87,11 +86,11 @@ def _save_code(custom_metric_id: int, code: str):
 
 
 def _remove_code(custom_metric_id: int):
-    _code_path(custom_metric_id).unlink(missing_ok=False)
+    _code_path(custom_metric_id).unlink(missing_ok=True)
 
 
 def get_all_custom_metrics() -> List[CustomMetric]:
-    return [_convert_from_document_to_custom_metric(e) for e in CUSTOM_METRICS_DB.all()]
+    return [_convert_from_document_to_custom_metric(e) for e in CUSTOM_METRICS_DB.all() if e is not None]
 
 
 def get_custom_metric(custom_metric_id: int) -> CustomMetric:

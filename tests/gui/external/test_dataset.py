@@ -73,5 +73,6 @@ def test_parse_river_dataset():
             },
         },
     })
+    assert dataset.name == "AnomalySine"
     assert type(dataset) == AnomalySine
     assert dataset.n_samples == 3333

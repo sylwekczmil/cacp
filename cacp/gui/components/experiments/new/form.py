@@ -6,6 +6,7 @@ from dash import html, Output, callback, Input, State, ctx, no_update
 from cacp.gui.components.classifiers.custom_classifiers_table import CustomClassifiersTable
 from cacp.gui.components.classifiers.river_classifiers_table import RiverClassifiersTable
 from cacp.gui.components.classifiers.sklearn_classifiers_table import SklearnClassifiersTable
+from cacp.gui.components.datasets.custom_datasets_table import CustomDatasetsTable
 from cacp.gui.components.datasets.keel_datasets_table import KeelDatasetsTable
 from cacp.gui.components.datasets.river_datasets_table import RiverDatasetsTable
 from cacp.gui.components.experiments.new.selected_classifiers_table import SelectedClassifiersTable
@@ -67,16 +68,18 @@ class NewExperimentForm(html.Div):
             ],
             className="py-2",
         )
-
+        custom_datasets_selection = SelectionModal(
+            "Add Custom dataset", CustomDatasetsTable, aio_id=f"{aio_id}-kd"
+        )
         keel_datasets_selection = SelectionModal(
-            "Add Keel dataset", KeelDatasetsTable, aio_id=f"{aio_id}-kd"
+            "Add Keel dataset", KeelDatasetsTable, aio_id=f"{aio_id}-cd", button_kwargs=dict(className="mx-2"),
         )
         river_datasets_selection = SelectionModal(
             "Add River dataset", RiverDatasetsTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rd"
         )
         custom_classifiers_selection = SelectionModal(
-            "Add custom classifiers", CustomClassifiersTable, aio_id=f"{aio_id}-cc"
+            "Add Custom classifiers", CustomClassifiersTable, aio_id=f"{aio_id}-cc"
         )
         river_classifiers_selection = SelectionModal(
             "Add River classifiers", RiverClassifiersTable,
@@ -87,7 +90,7 @@ class NewExperimentForm(html.Div):
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-sc"
         )
         custom_metrics_selection = SelectionModal(
-            "Add custom metric", CustomMetricsTable, aio_id=f"{aio_id}-cm"
+            "Add Custom metric", CustomMetricsTable, aio_id=f"{aio_id}-cm"
         )
         river_metrics_selection = SelectionModal(
             "Add River metric", RiverMetricsTable,
@@ -117,7 +120,7 @@ class NewExperimentForm(html.Div):
                 type_input,
                 html.Br(),
                 html.Div([
-                    keel_datasets_selection, river_datasets_selection,
+                    custom_datasets_selection, keel_datasets_selection, river_datasets_selection,
                 ]),
                 html.Br(),
                 html.H5("Selected datasets"),
@@ -223,6 +226,7 @@ class NewExperimentForm(html.Div):
 
         @callback(
             Output(self.ids.selected_datasets_store(aio_id), "data"),
+            Input(custom_datasets_selection.store_id, "data"),
             Input(keel_datasets_selection.store_id, "data"),
             Input(river_datasets_selection.store_id, "data"),
             Input(selected_datasets_table.ids.table(selected_datasets_table.aio_id), "cellRendererData"),
@@ -230,6 +234,7 @@ class NewExperimentForm(html.Div):
             State(self.ids.selected_datasets_store(aio_id), "data")
         )
         def selected_dataset(
+            selected_custom_dataset_data: list,
             selected_keel_dataset_data: list,
             selected_river_dataset_data: list,
             cell_renderer_data: dict,
@@ -239,6 +244,8 @@ class NewExperimentForm(html.Div):
 
             if ctx.triggered_id == self.ids.type_input(aio_id):
                 return []
+            elif ctx.triggered_id == custom_datasets_selection.store_id and selected_custom_dataset_data:
+                return prev_data + selected_custom_dataset_data
             elif ctx.triggered_id == keel_datasets_selection.store_id and selected_keel_dataset_data:
                 return prev_data + [{**d, "name": d["Name"]} for d in selected_keel_dataset_data]
             elif ctx.triggered_id == river_datasets_selection.store_id and selected_river_dataset_data:

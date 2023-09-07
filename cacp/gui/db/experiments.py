@@ -6,6 +6,7 @@ from typing import TypedDict, List, Dict, Optional
 from tinydb import TinyDB
 from tinydb.table import Document
 
+from cacp.gui.custom import CUSTOM_DIR
 from cacp.gui.db import DB_PATH
 
 
@@ -32,7 +33,7 @@ class Experiment(TypedDict):
     created_at: float
 
 
-EXPERIMENTS_DB = TinyDB(DB_PATH / "experiments.json")
+EXPERIMENTS_DB = TinyDB(CUSTOM_DIR / "experiments.json")
 EXPERIMENTS_PATH = (DB_PATH / "experiments").resolve()
 
 
