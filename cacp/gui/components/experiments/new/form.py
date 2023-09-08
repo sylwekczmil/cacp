@@ -170,7 +170,7 @@ class NewExperimentForm(html.Div):
                    "className"),
             Input(self.ids.type_input(aio_id), "value"),
         )
-        def update_sklearn_classifiers_button_class(type_value):
+        def update_sklearn_metricss_button_class(type_value):
             return "mx-2" if type_value == ExperimentType.BATCH else "d-none"
 
         @callback(

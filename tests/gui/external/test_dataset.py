@@ -12,13 +12,14 @@ def test_parse_keel_dataset():
         "Instances": 150,
         "Features": 4,
         "Classes": 3,
-        "docs_url": "[https://sci2s.ugr.es/keel/dataset/data/classification/iris-names.txt](https://sci2s.ugr.es/keel/dataset/data/classification/iris-names.txt)",
+        "docs_url": "[https://sci2s.ugr.es/keel/dataset/data/classification/iris-names.txt]"
+                    "(https://sci2s.ugr.es/keel/dataset/data/classification/iris-names.txt)",
         "json_schema": {"title": "iris", "type": "object", "properties": {}},
         "id": "cacp.dataset.ClassificationDataset",
         "name": "iris",
     })
     assert dataset.name == "iris"
-    assert type(dataset) == ClassificationDataset
+    assert isinstance(dataset, ClassificationDataset)
 
 
 def test_parse_river_dataset():
@@ -41,7 +42,8 @@ def test_parse_river_dataset():
         "features": 2,
         "outputs": 1,
         "classes": 1,
-        "docs_url": "[https://riverml.xyz/0.11.1/api/synth/AnomalySine](https://riverml.xyz/0.11.1/api/synth/AnomalySine)",
+        "docs_url": "[https://riverml.xyz/0.11.1/api/synth/AnomalySine]"
+                    "(https://riverml.xyz/0.11.1/api/synth/AnomalySine)",
         "json_schema": {
             "title": "AnomalySine",
             "type": "object",
@@ -74,5 +76,5 @@ def test_parse_river_dataset():
         },
     })
     assert dataset.name == "AnomalySine"
-    assert type(dataset) == AnomalySine
+    assert isinstance(dataset, AnomalySine)
     assert dataset.n_samples == 3333

@@ -37,17 +37,16 @@ CUSTOM_METRICS_DB = TinyDB(CUSTOM_METRICS_CODE_DIR / "custom_metrics.json")
 CUSTOM_METRIC_BATCH_CODE_TEMPLATE = """import numpy as np
 
 
-def metric{}(y_true: np.ndarray, y_pred: np.ndarray, labels: np.ndarray): # do not change function declaration
+def metric{}(y_true: np.ndarray, y_pred: np.ndarray, labels: np.ndarray):  # do not change function declaration
     return 0.5
-
 """
+
 CUSTOM_INCREMENTAL_METRIC_CODE_TEMPLATE = """from river.metrics.base import ClassificationMetric
 
 
-class Metric{}(ClassificationMetric): # do not change class declaration
+class Metric{}(ClassificationMetric):  # do not change class declaration
     def get(self) -> float:
         return 0.5
-
 """
 
 

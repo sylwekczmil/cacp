@@ -43,14 +43,14 @@ from cacp import ClassificationDatasetMinimalBase, ClassificationFoldData
 from cacp.dataset import AVAILABLE_N_FOLDS
 
 
-class Dataset{}(ClassificationDatasetMinimalBase): # do not change class declaration
+class Dataset{}(ClassificationDatasetMinimalBase):  # do not change class declaration
 
     def folds(
         self,
         n_folds: AVAILABLE_N_FOLDS = 10,
         dob_scv: bool = True,
         categorical_to_numerical=True
-    ) -> typing.Iterable[ClassificationFoldData]: # do not change method declaration
+    ) -> typing.Iterable[ClassificationFoldData]:  # do not change method declaration
 
         # change code below
 
@@ -79,7 +79,6 @@ class Dataset{}(ClassificationDatasetMinimalBase): # do not change class declara
             ))
 
         return iter(folds)
-
 """
 
 KEEL_DATASET_CODE_TEMPLATE = """from pathlib import Path
@@ -90,8 +89,7 @@ from cacp import LocalClassificationDataset
 class Dataset{}(LocalClassificationDataset):
 
     def __init__(self):
-        super().__init__("{}", Path("{}"))
-
+        super().__init__("{}", Path(r"{}"))
 """
 
 CSV_DATASET_CODE_TEMPLATE = """from pathlib import Path
@@ -102,8 +100,7 @@ from cacp import LocalCsvClassificationDataset
 class Dataset{}(LocalCsvClassificationDataset):
 
     def __init__(self):
-        super().__init__("{}", Path("{}"))
-
+        super().__init__("{}", Path(r"{}"))
 """
 
 

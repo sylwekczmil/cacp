@@ -16,7 +16,7 @@ class RiverMetricModel(ClassModel):
         return ClassificationMetric
 
     @classmethod
-    def from_class(cls, source_class: Type) -> "RiverClassifierModel":
+    def from_class(cls, source_class: Type) -> "RiverMetricModel":
         _id = to_id(source_class)
         docs_split = _id.split(".")
         docs_version = river.__version__

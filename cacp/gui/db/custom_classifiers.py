@@ -36,7 +36,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 
 
 #  Example BATCH classifier, returns always first class
-class Classifier{}(BaseEstimator, ClassifierMixin): # do not change class declaration
+class Classifier{}(BaseEstimator, ClassifierMixin):  # do not change class declaration
 
     def __init__(self):
         self.class_value = None
@@ -57,21 +57,21 @@ class Classifier{}(BaseEstimator, ClassifierMixin): # do not change class declar
             raise Exception("Classifier not fitted")
 
         return np.full(len(X), self.class_value)
-
 """
+
 CUSTOM_INCREMENTAL_CLASSIFIER_CODE_TEMPLATE = """import typing
 
 from river import base
 
 
 #  Example INCREMENTAL classifier, returns last seen class
-class Classifier{}(base.Classifier): # do not change class declaration
+class Classifier{0}(base.Classifier):  # do not change class declaration
 
     def __init__(self):
         self.last_class = None
         self.classes = set()
 
-    def learn_one(self, x: typing.Dict, y: base.typing.ClfTarget, **kwargs) -> "Classifier":
+    def learn_one(self, x: typing.Dict, y: base.typing.ClfTarget, **kwargs) -> "Classifier{0}":
         self.last_class = y
         self.classes.add(y)
         return self
@@ -82,10 +82,9 @@ class Classifier{}(base.Classifier): # do not change class declaration
     def predict_proba_one(self, x: typing.Dict) -> typing.Dict[base.typing.ClfTarget, float]:
         probabilities = dict()
         for c in self.classes:
-          probabilities[c] = 0
+            probabilities[c] = 0
         probabilities[self.last_class] = 1
         return probabilities
-
 """
 
 

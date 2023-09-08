@@ -188,10 +188,10 @@ class DocToPydanticMapper:
         doc_string = class_type.__doc__
         if doc_string:
             parameter_in_doc_string = f"{parameter.name} :"
-            for l in doc_string.split("\n"):
-                l = l.strip()
-                if l.startswith(parameter_in_doc_string):
-                    possible_primitive = l.replace(parameter_in_doc_string, "").strip().split(",")[0]
+            for line in doc_string.split("\n"):
+                line = line.strip()
+                if line.startswith(parameter_in_doc_string):
+                    possible_primitive = line.replace(parameter_in_doc_string, "").strip().split(",")[0]
                     if possible_primitive in ["bool", "int", "float", "str"]:
                         return ModelField.infer(
                             name=parameter.name,

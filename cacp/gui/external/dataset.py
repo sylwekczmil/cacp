@@ -7,7 +7,7 @@ from cacp import ClassificationDataset
 def parse_dataset(dataset_dict: Dict):
     ds = None
     if "code" in dataset_dict:  # custom dataset
-        dataset_type = cast(Callable, locate(dataset_dict["locate_id"]))
+        dataset_type = cast(Callable, locate(dataset_dict["locate_id"], True))
         ds = dataset_type()
     elif dataset_dict["id"] == "cacp.dataset.ClassificationDataset":
         ds = ClassificationDataset(dataset_dict["Name"])
