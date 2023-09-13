@@ -19,3 +19,12 @@
 .selection-modal-body .dash-ag-grid-table-button {
     display: none;
 }
+
+
+.image-title {
+    font-weight: bold;
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
