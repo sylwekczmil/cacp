@@ -1,7 +1,7 @@
 var dashAgGridComponentFunctions = (window.dashAgGridComponentFunctions = window.dashAgGridComponentFunctions || {});
 
 dashAgGridComponentFunctions.Button = function (props) {
-    const {setData, buttonName, buttonClassName, iconClassName} = props;
+    const {setData, buttonName, buttonClassName, iconClassName, disabled} = props;
 
     function onClick() {
         setData();
@@ -10,7 +10,8 @@ dashAgGridComponentFunctions.Button = function (props) {
     return React.createElement(
         "button",
         {
-            onClick: onClick,
+            onClick,
+            disabled,
             className: buttonClassName + " dash-ag-grid-table-button"
         },
         buttonName, " ", React.createElement("i", {className: iconClassName}, "")

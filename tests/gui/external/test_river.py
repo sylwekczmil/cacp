@@ -18,3 +18,15 @@ def test_schema_creation_on_all():
             assert model.json_schema is not None
         except Exception as e:
             print(e)
+
+
+def test_list_keel_classifiers():
+    assert len(RiverClassifierModel.all()) == 46
+
+
+def test_list_keel_models():
+    assert len(RiverDatasetModel.all()) == 45
+
+
+def test_list_sklearn_classifiers():
+    assert len(SklearnClassifierModel.all()) == 41

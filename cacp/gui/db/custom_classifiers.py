@@ -14,6 +14,7 @@ from cacp.comparison import process_comparison_single, DEFAULT_METRICS, process_
     DEFAULT_INCREMENTAL_METRICS
 from cacp.gui.custom.classifiers import CUSTOM_CLASSIFIERS_CODE_DIR
 from cacp.gui.external.classifier import parse_classifier
+from cacp.gui.preview import preview_prevent_modifications
 
 
 class CustomClassifierType(str, Enum):
@@ -130,6 +131,7 @@ def get_custom_classifier(custom_classifier_id: int) -> CustomClassifier:
 
 
 def add_custom_classifier() -> int:
+    preview_prevent_modifications()
     new_custom_classifier: CustomClassifier = dict()
     all_classifiers = CUSTOM_CLASSIFIERS_DB.all()
     new_custom_classifier_id = 1 if len(all_classifiers) == 0 else all_classifiers[-1].doc_id + 1
@@ -148,12 +150,14 @@ def update_custom_classifier(
     type_value: CustomClassifierType,
     code_value: str
 ):
+    preview_prevent_modifications()
     CUSTOM_CLASSIFIERS_DB.update({"name": name_value, "type": type_value, "code": code_value},
                                  doc_ids=[custom_classifier_id])
     _save_code(custom_classifier_id, code_value)
 
 
 def test_custom_classifier_code(custom_classifier_id: int, code_value: str, type_value: CustomClassifierType):
+    preview_prevent_modifications()
     error = None
     _save_code(0, code_value)
     classifier_factory = parse_classifier({"locate_id": _locate_id(0, custom_classifier_id), "code": code_value})
@@ -178,5 +182,6 @@ def test_custom_classifier_code(custom_classifier_id: int, code_value: str, type
 
 
 def delete_custom_classifier(custom_classifier_id: int):
+    preview_prevent_modifications()
     CUSTOM_CLASSIFIERS_DB.remove(doc_ids=[custom_classifier_id])
     _remove_code(custom_classifier_id)

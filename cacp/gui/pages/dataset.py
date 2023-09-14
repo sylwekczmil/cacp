@@ -10,6 +10,7 @@ from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_datasets import get_custom_dataset, CustomDatasetType, CustomDataset, \
     update_custom_dataset, CUSTOM_DATASET_CODE_TEMPLATE, \
     test_custom_dataset_code, KEEL_DATASET_CODE_TEMPLATE, CSV_DATASET_CODE_TEMPLATE
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__, path_template="/custom_dataset/<custom_dataset_id>")
 
@@ -84,7 +85,7 @@ def layout(custom_dataset_id=None):
 
     save_button = html.Div([
         dbc.Button(
-            "Save", id=CUSTOM_DATASET_SAVE_BUTTON_ID, className="mt-3", n_clicks=0
+            "Save", id=CUSTOM_DATASET_SAVE_BUTTON_ID, className="mt-3", n_clicks=0, **preview_button_kwargs()
         )
     ], className="d-flex justify-content-end align-items-center")
 

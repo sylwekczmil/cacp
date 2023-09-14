@@ -5,6 +5,7 @@ from dash import html, callback, Output, Input, State, no_update
 
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.experiments import get_all_experiments, delete_experiment
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__, path="/")
 
@@ -36,8 +37,9 @@ def layout():
                     "cellRendererParams": {
                         "buttonName": "Delete",
                         "buttonClassName": "btn btn-sm btn-danger",
-                        "iconClassName": "bi bi-trash delete-button"
-                    },
+                        "iconClassName": "bi bi-trash delete-button",
+                        **preview_button_kwargs()
+                    }
                 },
                 {
                     "field": "navigate", "headerName": "", "sortable": False, "filter": False, "resizable": False,

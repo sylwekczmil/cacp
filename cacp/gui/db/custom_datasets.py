@@ -15,6 +15,7 @@ from cacp.comparison import process_comparison_single, DEFAULT_METRICS, process_
     DEFAULT_INCREMENTAL_METRICS
 from cacp.gui.custom.datasets import CUSTOM_DATASETS_CODE_DIR
 from cacp.gui.external.dataset import parse_dataset
+from cacp.gui.preview import preview_prevent_modifications
 
 
 class CustomDatasetType(str, Enum):
@@ -147,6 +148,7 @@ def get_custom_dataset(custom_dataset_id: int) -> CustomDataset:
 
 
 def add_custom_dataset() -> int:
+    preview_prevent_modifications()
     new_custom_dataset: CustomDataset = dict()
     all_datasets = CUSTOM_DATASETS_DB.all()
     new_custom_dataset_id = 1 if len(all_datasets) == 0 else all_datasets[-1].doc_id + 1
@@ -166,6 +168,7 @@ def update_custom_dataset(
     code_value: str,
     path_value: typing.Optional[str] = None
 ):
+    preview_prevent_modifications()
     CUSTOM_DATASETS_DB.update({"name": name_value, "type": type_value, "code": code_value,
                                "path": path_value, "locate_id": _locate_id(custom_dataset_id)},
                               doc_ids=[custom_dataset_id])
@@ -173,6 +176,7 @@ def update_custom_dataset(
 
 
 def test_custom_dataset_code(custom_dataset_id: int, name_value: str, code_value: str):
+    preview_prevent_modifications()
     error = None
     _save_code(0, code_value)
     try:
@@ -204,5 +208,6 @@ def test_custom_dataset_code(custom_dataset_id: int, name_value: str, code_value
 
 
 def delete_custom_dataset(custom_dataset_id: int):
+    preview_prevent_modifications()
     CUSTOM_DATASETS_DB.remove(doc_ids=[custom_dataset_id])
     _remove_code(custom_dataset_id)

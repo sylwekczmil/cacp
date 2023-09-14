@@ -8,6 +8,7 @@ from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_metrics import get_custom_metric, CustomMetricType, CustomMetric, \
     update_custom_metric, CUSTOM_METRIC_BATCH_CODE_TEMPLATE, CUSTOM_INCREMENTAL_METRIC_CODE_TEMPLATE, \
     test_custom_metric_code
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__, path_template="/custom_metric/<custom_metric_id>")
 
@@ -64,7 +65,7 @@ def layout(custom_metric_id=None):
 
     save_button = html.Div([
         dbc.Button(
-            "Save", id=CUSTOM_METRIC_SAVE_BUTTON_ID, className="mt-3", n_clicks=0
+            "Save", id=CUSTOM_METRIC_SAVE_BUTTON_ID, className="mt-3", n_clicks=0, **preview_button_kwargs()
         )
     ], className="d-flex justify-content-end align-items-center")
 

@@ -6,13 +6,15 @@ from cacp.gui.components.datasets.keel_datasets_table import KeelDatasetsTable
 from cacp.gui.components.datasets.river_datasets_table import RiverDatasetsTable
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_datasets import add_custom_dataset
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__)
 
 ADD_CUSTOM_DATASET_BUTTON_ID = "add_custom_dataset_button"
 
 layout = html.Div([
-    html.Div(html.Button("Add custom dataset", className="btn btn-primary", id=ADD_CUSTOM_DATASET_BUTTON_ID),
+    html.Div(html.Button("Add custom dataset", className="btn btn-primary", id=ADD_CUSTOM_DATASET_BUTTON_ID,
+                         **preview_button_kwargs()),
              className="d-flex justify-content-end mb-4"),
     html.H5("Custom datasets"),
     CustomDatasetsTable("cdt"),

@@ -9,6 +9,7 @@ from dash.dcc import Store
 from cacp.gui.components.experiments.details.processor import ExperimentProcessor
 from cacp.gui.components.shared.utils import csv_to_grid
 from cacp.gui.db.experiments import get_experiment, Experiment, ExperimentStatus, ExperimentType
+from cacp.gui.preview import is_preview
 
 dash.register_page(__name__, path_template="/experiment/<experiment_id>")
 
@@ -87,7 +88,8 @@ EXPERIMENT_PROCESSOR = ExperimentProcessor(EXPERIMENT_STORE_ID)
 def layout(experiment_id=None):
     experiment = get_experiment(experiment_id) if experiment_id else None
     view = html.Div([
-        EXPERIMENT_PROCESSOR if experiment and experiment["status"] == ExperimentStatus.RUNNING else "",
+        EXPERIMENT_PROCESSOR if experiment and experiment[
+            "status"] == ExperimentStatus.RUNNING and not is_preview() else "",
         html.Div(show_experiment(experiment) if experiment else [], id=EXPERIMENT_RESULTS_ID),
         Store(id=EXPERIMENT_STORE_ID, data=experiment),
     ])

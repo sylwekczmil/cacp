@@ -16,6 +16,7 @@ from cacp import ClassificationDataset
 from cacp.comparison import process_comparison_single, process_incremental_comparison_single
 from cacp.gui.custom.metrics import CUSTOM_METRICS_CODE_DIR
 from cacp.gui.external.metric import parse_metric
+from cacp.gui.preview import preview_prevent_modifications
 from cacp.util import accuracy
 
 
@@ -97,6 +98,7 @@ def get_custom_metric(custom_metric_id: int) -> CustomMetric:
 
 
 def add_custom_metric() -> int:
+    preview_prevent_modifications()
     new_custom_metric: CustomMetric = dict()
     all_metrics = CUSTOM_METRICS_DB.all()
     new_custom_metric_id = 1 if len(all_metrics) == 0 else all_metrics[-1].doc_id + 1
@@ -115,6 +117,7 @@ def update_custom_metric(
     type_value: CustomMetricType,
     code_value: str
 ):
+    preview_prevent_modifications()
     CUSTOM_METRICS_DB.update({"name": name_value, "type": type_value, "code": code_value,
                               "locate_id": _locate_id(custom_metric_id, type_value)},
                              doc_ids=[custom_metric_id])
@@ -122,6 +125,7 @@ def update_custom_metric(
 
 
 def test_custom_metric_code(custom_metric_id: int, code_value: str, type_value: CustomMetricType):
+    preview_prevent_modifications()
     error = None
     _save_code(0, code_value)
     metric_factory = parse_metric({"locate_id": _locate_id(0, type_value, custom_metric_id), "code": code_value})
@@ -147,5 +151,6 @@ def test_custom_metric_code(custom_metric_id: int, code_value: str, type_value: 
 
 
 def delete_custom_metric(custom_metric_id: int):
+    preview_prevent_modifications()
     CUSTOM_METRICS_DB.remove(doc_ids=[custom_metric_id])
     _remove_code(custom_metric_id)

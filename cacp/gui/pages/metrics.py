@@ -6,6 +6,7 @@ from cacp.gui.components.metrics.river_metrics_table import RiverMetricsTable
 from cacp.gui.components.metrics.sklearn_metrics_table import SklearnMetricsTable
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_metrics import add_custom_metric
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__)
 
@@ -13,7 +14,8 @@ ADD_CUSTOM_CLASSIFIER_BUTTON_ID = "add_custom_metric_button"
 
 layout = html.Div([
     html.Div(
-        html.Button("Add custom metric", className="btn btn-primary", id=ADD_CUSTOM_CLASSIFIER_BUTTON_ID),
+        html.Button("Add custom metric", className="btn btn-primary", id=ADD_CUSTOM_CLASSIFIER_BUTTON_ID,
+                    **preview_button_kwargs()),
         className="d-flex justify-content-end mb-4"),
     html.H5("Custom metrics"),
     CustomMetricsTable("cmt"),

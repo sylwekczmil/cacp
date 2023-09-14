@@ -4,6 +4,7 @@ from dash.dcc import Store
 
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_classifiers import get_all_custom_classifiers, delete_custom_classifier
+from cacp.gui.preview import preview_button_kwargs
 
 
 class CustomClassifiersTable(html.Div):
@@ -43,7 +44,8 @@ class CustomClassifiersTable(html.Div):
                         "cellRendererParams": {
                             "buttonName": "Delete",
                             "buttonClassName": "btn btn-sm btn-danger",
-                            "iconClassName": "bi bi-trash delete-button"
+                            "iconClassName": "bi bi-trash delete-button",
+                            **preview_button_kwargs()
                         },
                     },
                     {

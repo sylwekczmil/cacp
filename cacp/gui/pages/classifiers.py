@@ -6,6 +6,7 @@ from cacp.gui.components.classifiers.river_classifiers_table import RiverClassif
 from cacp.gui.components.classifiers.sklearn_classifiers_table import SklearnClassifiersTable
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_classifiers import add_custom_classifier
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__)
 
@@ -13,7 +14,8 @@ ADD_CUSTOM_CLASSIFIER_BUTTON_ID = "add_custom_classifier_button"
 
 layout = html.Div([
     html.Div(
-        html.Button("Add custom classifier", className="btn btn-primary", id=ADD_CUSTOM_CLASSIFIER_BUTTON_ID),
+        html.Button("Add custom classifier", className="btn btn-primary", id=ADD_CUSTOM_CLASSIFIER_BUTTON_ID,
+                    **preview_button_kwargs()),
         className="d-flex justify-content-end mb-4"),
     html.H5("Custom classifiers"),
     CustomClassifiersTable("cct"),

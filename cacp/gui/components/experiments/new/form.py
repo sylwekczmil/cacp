@@ -18,6 +18,7 @@ from cacp.gui.components.metrics.river_metrics_table import RiverMetricsTable
 from cacp.gui.components.metrics.sklearn_metrics_table import SklearnMetricsTable
 from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.experiments import ExperimentType, add_experiment
+from cacp.gui.preview import preview_button_kwargs
 
 
 class NewExperimentForm(html.Div):
@@ -141,7 +142,8 @@ class NewExperimentForm(html.Div):
                 selected_metrics_table,
                 html.Div([
                     dbc.Button(
-                        "Create", id=self.ids.create_button(aio_id), className="mt-3", n_clicks=0
+                        "Create", id=self.ids.create_button(aio_id), className="mt-3", n_clicks=0,
+                        **preview_button_kwargs()
                     )
                 ], className="d-flex justify-content-end align-items-center"),
                 dbc.Toast(

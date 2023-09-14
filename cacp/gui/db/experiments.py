@@ -8,6 +8,7 @@ from tinydb.table import Document
 
 from cacp.gui.custom import CUSTOM_DIR
 from cacp.gui.db import DB_PATH
+from cacp.gui.preview import preview_prevent_modifications
 
 
 class ExperimentType(str, Enum):
@@ -57,6 +58,7 @@ def add_experiment(
     name_value: str, type_value: ExperimentType, selected_datasets: List[Dict], selected_classifiers: List[Dict],
     selected_metrics: List[Dict]
 ) -> int:
+    preview_prevent_modifications()
     new_experiment: Experiment = dict()
     new_experiment["name"] = name_value
     new_experiment["type"] = type_value
@@ -71,10 +73,12 @@ def add_experiment(
 
 
 def update_experiment_status(experiment_id: int, experiment_status: ExperimentStatus):
+    preview_prevent_modifications()
     EXPERIMENTS_DB.update({"status": experiment_status}, doc_ids=[experiment_id])
 
 
 def delete_experiment(experiment_id: int):
+    preview_prevent_modifications()
     experiment = get_experiment(experiment_id)
     shutil.rmtree(experiment["path"], ignore_errors=True)
     EXPERIMENTS_DB.remove(doc_ids=[experiment_id])

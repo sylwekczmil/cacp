@@ -8,6 +8,7 @@ from cacp.gui.components.shared.utils import global_location_href_output
 from cacp.gui.db.custom_classifiers import get_custom_classifier, CustomClassifierType, CustomClassifier, \
     update_custom_classifier, CUSTOM_CLASSIFIER_BATCH_CODE_TEMPLATE, CUSTOM_INCREMENTAL_CLASSIFIER_CODE_TEMPLATE, \
     test_custom_classifier_code
+from cacp.gui.preview import preview_button_kwargs
 
 dash.register_page(__name__, path_template="/custom_classifier/<custom_classifier_id>")
 
@@ -64,8 +65,8 @@ def layout(custom_classifier_id=None):
 
     save_button = html.Div([
         dbc.Button(
-            "Save", id=CUSTOM_CLASSIFIER_SAVE_BUTTON_ID, className="mt-3", n_clicks=0
-        )
+            "Save", id=CUSTOM_CLASSIFIER_SAVE_BUTTON_ID, className="mt-3", n_clicks=0, **preview_button_kwargs()
+        ),
     ], className="d-flex justify-content-end align-items-center")
 
     toast = dbc.Toast(
