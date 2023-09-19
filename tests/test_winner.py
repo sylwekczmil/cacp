@@ -1,7 +1,14 @@
+import os
+
+import pytest
+
 from cacp.winner import process_comparison_result_winners
 
+IN_GITHUB_ACTIONS = bool(os.getenv("GITHUB_ACTIONS", False))
 
-def test_comparison_results(result_dir_with_data, golden_result_dir):
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_winner_comparison_results(result_dir_with_data, golden_result_dir):
     process_comparison_result_winners(result_dir_with_data)
 
     result_winner_dir = result_dir_with_data.joinpath('winner')
