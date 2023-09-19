@@ -6,16 +6,19 @@ CACP: Classification Algorithms Comparison Pipeline
 .. image:: https://img.shields.io/pypi/v/cacp.svg
         :target: https://pypi.python.org/pypi/cacp
 
-.. image:: https://github.com/sylwekczmil/cacp/actions/workflows/tox.yml/badge.svg
-        :target: https://github.com/sylwekczmil/cacp/actions/workflows/tox.yml
+
+.. image:: https://github.com/sylwekczmil/cacp/actions/workflows/test.yml/badge.svg
+        :target: https://github.com/sylwekczmil/cacp/actions/workflows/test.yml
 
 
 .. image:: https://readthedocs.org/projects/cacp/badge/?version=latest
         :target: https://cacp.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
+
 * Free software: MIT license
-* Documentation: https://cacp.readthedocs.io.
+* Documentation: https://cacp.readthedocs.io
+* GUI Preview: https://cacp.czmil.com
 * Article: https://doi.org/10.1016/j.softx.2022.101134
 
 
@@ -33,6 +36,11 @@ To install cacp, run this command in your terminal:
 
     pip install cacp
 
+Python 3.10 or greater required to download latest version of CACP. In order to install older version that supports Python 3.8 or greater, run this command in your terminal:
+
+.. code-block:: console
+
+    pip install cacp==0.3.1
 
 Usage
 ------
@@ -179,3 +187,47 @@ https://github.com/sylwekczmil/cacp/tree/main/cacp_examples_incremental.
             results_directory='./example_result'
         )
 
+Graphical user interface (GUI)
+------------------------------
+
+PIP
+***
+
+After installation, run this command in your terminal:
+
+.. code-block:: console
+
+    cacp
+
+You should get message like this:
+
+.. code-block:: console
+
+    CACP stared on http://127.0.0.1:8050/
+
+Make sure that your scripts directory is in the PATH.
+Example gui executable file on Windows can be found under:
+
+.. code-block:: console
+
+     C:/Users/<USER>/AppData/Local/Programs/Python/Python<PYTHON_VERSION>/Scripts/cacp.exe.
+
+Docker
+******
+
+You can also run CACP GUI with docker:
+
+.. code-block:: console
+
+     docker run -p 8050:8050 --name cacp sylwekczmil/cacp
+
+CACP will be available at: http://127.0.0.1:8050/
+
+
+CACP GUI Preview
+----------------
+
+Sample preview of the CACP GUI is available at: https://cacp.czmil.com.
+
+.. image:: https://github.com/sylwekczmil/cacp/blob/main/docs/images/gui.png?raw=true
+   :width: 100%

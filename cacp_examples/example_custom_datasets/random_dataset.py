@@ -21,7 +21,7 @@ class RandomDataset(ClassificationDatasetBase):
 
         folds = []
 
-        for i, (train_index, test_index) in enumerate(kf.split(x)):
+        for i, (train_index, test_index) in enumerate(kf.split(x), start=1):
             x_train, x_test = x[train_index], x[test_index]
             y_train, y_test = y[train_index], y[test_index]
 
@@ -34,7 +34,7 @@ class RandomDataset(ClassificationDatasetBase):
                 y_train=y_train
             ))
 
-        return folds
+        return iter(folds)
 
     @property
     def name(self) -> str:

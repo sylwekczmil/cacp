@@ -1,4 +1,4 @@
-,Acronym,Name,Library,Type
+,Name,Class Name,Library,Type
 1,ARF,AdaptiveRandomForest,river,incremental
 2,GNB,GaussianNB,river,incremental
 3,HAT,HoeffdingTree,river,incremental

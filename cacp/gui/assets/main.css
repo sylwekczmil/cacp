@@ -1,0 +1,30 @@
+.rxjs-submit {
+    margin-top: 30px;
+    float: right !important;
+}
+
+.rjsf > .border-danger {
+    display: none !important;
+}
+
+.progress {
+    height: 20px !important;
+}
+
+.progress-bar {
+    height: 20px !important;
+    font-size: 16px !important;
+}
+
+.selection-modal-body .dash-ag-grid-table-button {
+    display: none;
+}
+
+
+.image-title {
+    font-weight: bold;
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

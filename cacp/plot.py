@@ -50,7 +50,7 @@ class Line:
     label: str = ''
 
 
-def _plot_incremental(file_name: str, y_label: str, lines: typing.List[Line], plot_dir: Path):
+def process_comparison_results_incremental_plot(file_name: str, y_label: str, lines: typing.List[Line], plot_dir: Path):
     for line in lines:
         plt.plot(line.x, line.y, label=line.label)
     plt.xlabel('Number of samples')
@@ -80,7 +80,7 @@ def process_comparison_results_single_incremental_plot(classifier_name: str, dat
     incremental_classifier_single_plot_dir = incremental_plot_dir.joinpath('single').joinpath(classifier_name)
     incremental_classifier_single_plot_dir.mkdir(exist_ok=True, parents=True)
     line = Line(df['index'], df[metric])
-    _plot_incremental(
+    process_comparison_results_incremental_plot(
         f"{classifier_name}_{dataset_name}_{metric.lower()}",
         metric,
         [line],
@@ -126,7 +126,7 @@ def process_comparison_results_incremental_plots(
     for dataset_name, dfs in dataset_dfs.items():
         for metric in metrics_names:
             lines = [Line(df['index'], df[metric], classifier_names[i]) for i, df in enumerate(dfs)]
-            _plot_incremental(
+            process_comparison_results_incremental_plot(
                 f"{dataset_name}_{metric.lower()}",
                 metric,
                 lines,

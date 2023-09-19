@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 
 from cacp import all_datasets, LocalClassificationDataset
+from cacp.dataset import LocalCsvClassificationDataset
 from cacp_examples.example_custom_datasets.random_dataset import RandomDataset
 
 
@@ -48,7 +49,7 @@ def test_custom_dataset():
     assert ds.classes == 2
     assert ds.instances == 100
 
-    for i, fold in enumerate(ds.folds()):
+    for i, fold in enumerate(ds.folds(), start=1):
         assert fold.index == i
         assert np.all(fold.labels == np.array([0, 1]))
         assert fold.x_train.shape == (90, 5)
@@ -69,6 +70,27 @@ def test_local_dataset():
     assert ds.features == 4
     assert ds.classes == 3
     assert ds.instances == 150
+
+
+def test_local_csv_dataset():
+    ds_path = Path(__file__).parent.parent. \
+        joinpath('cacp_examples') \
+        .joinpath('example_custom_datasets') \
+        .joinpath('iris.csv')
+    ds = LocalCsvClassificationDataset('iris', ds_path)
+    assert ds.name == 'iris'
+    assert ds.features == 4
+    assert ds.classes == 3
+    assert ds.instances == 150
+
+    index = 0
+    for index, fold in enumerate(ds.folds(), 1):
+        assert fold.index == index
+        assert fold.x_train.shape == (135, 4)
+        assert fold.x_test.shape == (15, 4)
+        assert fold.y_train.shape == (135,)
+        assert fold.y_test.shape == (15,)
+    assert index == 10
 
 
 def test_dataset_folds(datasets):
@@ -92,3 +114,25 @@ def test_dataset_iter(datasets):
         assert len(x) == 4
         assert list(x.keys()) == [0, 1, 2, 3]
     assert index == 150
+
+
+def test_dataset_iter_seed(datasets):
+    ds = datasets[0]
+    ds.seed = 1
+
+    y_array_1 = []
+    for (x, y) in ds:
+        y_array_1.append(y)
+
+    y_array_2 = []
+    for (x, y) in ds:
+        y_array_2.append(y)
+
+    assert y_array_1 == y_array_2
+
+    ds.seed = 2
+    y_array_3 = []
+    for (x, y) in ds:
+        y_array_3.append(y)
+
+    assert y_array_1 != y_array_3

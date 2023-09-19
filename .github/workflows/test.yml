@@ -1,0 +1,41 @@
+name: Python tests
+
+on: [ push ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install pipx
+        run: python -m pip install --user pipx
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run flake8
+        run: poetry run flake8 cacp cacp_examples tests
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pipx
+        run: python -m pip install --user pipx
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run pytest
+        run: poetry run pytest -vv tests

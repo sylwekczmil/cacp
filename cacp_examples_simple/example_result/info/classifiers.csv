@@ -1,4 +1,4 @@
-,Acronym,Name,Library,Type
+,Name,Class Name,Library,Type
 1,DT,DecisionTree,sklearn,offline
 2,KNN,KNeighbors,sklearn,offline
 3,RF,RandomForest,sklearn,offline

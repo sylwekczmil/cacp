@@ -1,4 +1,4 @@
-,Acronym,Name,Library,Type
+,Name,Class Name,Library,Type
 1,XGB,XGBoost,cacp_examples,custom
 2,AB,AdaBoost,sklearn,offline
 3,DT,DecisionTree,sklearn,offline

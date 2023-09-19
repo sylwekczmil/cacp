@@ -8,6 +8,7 @@ import pandas as pd
 import river
 from joblib import delayed, Parallel
 from river import metrics as river_metrics, stream, utils
+from river.datasets.base import Dataset
 from tqdm import tqdm
 
 from cacp.dataset import ClassificationDatasetBase, ClassificationFoldData, AVAILABLE_N_FOLDS, \
@@ -22,11 +23,12 @@ DEFAULT_INCREMENTAL_METRICS = (
 )
 
 
-def process_comparison_single(classifier_factory, classifier_name,
-                              dataset: ClassificationDatasetBase,
-                              fold: ClassificationFoldData,
-                              metrics: typing.Sequence[typing.Tuple[str, typing.Callable]],
-                              ) -> dict:
+def process_comparison_single(
+    classifier_factory, classifier_name,
+    dataset: ClassificationDatasetBase,
+    fold: ClassificationFoldData,
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]],
+) -> dict:
     """
     Runs comparison on single classifier and dataset.
 
@@ -41,14 +43,20 @@ def process_comparison_single(classifier_factory, classifier_name,
     model = classifier_factory(fold.x_train.shape[1], len(fold.labels))
     train_start_time = timer()
     labels = fold.labels
-    if 'classes' in inspect.getfullargspec(model.fit).args:
-        model.fit(fold.x_train, fold.y_train, classes=labels.tolist())
-    else:
-        model.fit(fold.x_train, fold.y_train)
-    train_time = timer() - train_start_time
-    pred_start_time = timer()
-    pred = model.predict(fold.x_test)
-    pred_time = timer() - pred_start_time
+    pred = None
+    try:
+        if 'classes' in inspect.getfullargspec(model.fit).args:
+            model.fit(fold.x_train, fold.y_train, classes=labels.tolist())
+        else:
+            model.fit(fold.x_train, fold.y_train)
+        train_time = timer() - train_start_time
+        pred_start_time = timer()
+        pred = model.predict(fold.x_test)
+        pred_time = timer() - pred_start_time
+    except Exception as e:
+        train_time = 9999
+        pred_time = 9999
+        print(f"Error while running {classifier_name}, metrics will be set to 0", e)
 
     result = {
         'Dataset': dataset.name,
@@ -62,7 +70,11 @@ def process_comparison_single(classifier_factory, classifier_name,
     }
 
     for (metric, metric_fun) in metrics:
-        result[metric] = metric_fun(fold.y_test, pred, labels)
+        try:
+            result[metric] = metric_fun(fold.y_test, pred, labels)
+        except Exception as e:
+            result[metric] = 0.
+            print(f"Error while calculating {metric} for {classifier_name}, value will be set to 0", e)
 
     return result
 
@@ -76,7 +88,8 @@ def process_comparison(
     custom_fold_modifiers: typing.List[ClassificationFoldDataModifierBase] = None,
     dob_scv: bool = True,
     categorical_to_numerical=True,
-    normalized: bool = False
+    normalized: bool = False,
+    progress=lambda progress, total: None,
 ):
     """
     Runs comparison for provided datasets and classifiers.
@@ -90,6 +103,7 @@ def process_comparison(
     :param dob_scv: if folds distribution optimally balanced stratified cross-validation (DOB-SCV) should be used
     :param categorical_to_numerical: if dataset categorical values should be converted to numerical
     :param normalized: if the data should be normalized in range [0..1]
+    :param progress: function that can be used to monitor progress
 
     """
     count = 0
@@ -105,6 +119,7 @@ def process_comparison(
         fold_modifiers.append(ClassificationFoldDataNormalizer())
 
     with tqdm(total=len(datasets) * n_folds, desc='Processing comparison', unit='fold') as pbar:
+        progress(pbar.n, pbar.total)
         for dataset_idx, dataset in enumerate(datasets):
             for fold in dataset.folds(n_folds=n_folds, dob_scv=dob_scv,
                                       categorical_to_numerical=categorical_to_numerical):
@@ -119,6 +134,7 @@ def process_comparison(
                 )
                 records.extend(rows)
                 pbar.update(1)
+                progress(pbar.n, pbar.total)
 
             df = pd.DataFrame(records)
             df = df.sort_values(by=['Dataset', 'Algorithm', 'CV index'])
@@ -138,7 +154,7 @@ def process_comparison(
 
 def process_incremental_comparison_single(classifier_factory, classifier_name,
                                           dataset: typing.Union[
-                                              ClassificationDatasetBase, river.datasets.base.Dataset
+                                              ClassificationDatasetBase, Dataset
                                           ], number_of_classes: int, incremental_comparison_dir: Path,
                                           metrics: typing.Sequence[
                                               typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS
@@ -165,61 +181,67 @@ def process_incremental_comparison_single(classifier_factory, classifier_name,
     train_size = 0
     dataset_name = "-"
 
-    dataset_type = type(dataset)
-    if issubclass(dataset_type, ClassificationDatasetBase):
-        dataset_name = dataset.name
-        train_size = dataset.instances
-    elif issubclass(dataset_type, river.datasets.base.Dataset):
-        dataset_name = dataset.__class__.__name__.lower()
-        train_size = dataset.n_samples
+    metric = river_metrics.base.Metrics([])
 
-    metric = river_metrics.base.Metrics([m() for _, m in metrics])
+    try:
+        dataset_type = type(dataset)
+        if issubclass(dataset_type, ClassificationDatasetBase):
+            dataset_name = dataset.name
+            train_size = dataset.instances
+        elif issubclass(dataset_type, Dataset):
+            dataset_name = dataset.__class__.__name__.lower()
+            train_size = dataset.n_samples
 
-    model = classifier_factory(train_size, number_of_classes)
+        metric = river_metrics.base.Metrics([m() for _, m in metrics])
+        model = classifier_factory(train_size, number_of_classes)
 
-    # Determine if predict_one or predict_proba_one should be used in case of a classifier
-    if utils.inspect.isclassifier(model) and not metric.requires_labels:
-        pred_func = model.predict_proba_one
-    else:
-        pred_func = model.predict_one
-
-    records = []
-    y_pred = None
-
-    for i, x, y, *kwargs in stream.simulate_qa(dataset, None, None, copy=True):
-
-        kwargs = kwargs[0] if kwargs else {}
-
-        if y is None:
-            # no ground truth, just make a prediction
-            pred_start_time = timer()
-            # predict
-            y_pred = pred_func(x=x, **kwargs)
-            pred_time_diff = timer() - pred_start_time
-            pred_time += pred_time_diff
+        # Determine if predict_one or predict_proba_one should be used in case of a classifier
+        if utils.inspect.isclassifier(model) and not metric.requires_labels:
+            pred_func = model.predict_proba_one
         else:
-            # there's a ground truth, model and metric can be updated
+            pred_func = model.predict_one
 
-            # update the metrics
-            if y_pred != {} and y_pred is not None:
-                metric.update(y_true=y, y_pred=y_pred)
-                record = {
-                    'index': i,
-                    'y_true': y,
-                    'y_pred': max(y_pred, key=y_pred.get)
-                }
-                for metric_idx, (metric_name, _) in enumerate(metrics):
-                    record[metric_name] = metric.data[metric_idx].get()
-                records.append(record)
+        records = []
+        y_pred = None
 
-            learn_one_start_time = timer()
-            # learn
-            model.learn_one(x=x, y=y, **kwargs)
-            learn_time_diff = timer() - learn_one_start_time
-            train_time += learn_time_diff
+        for i, x, y, *kwargs in stream.simulate_qa(dataset, None, None, copy=True):
 
-    df = pd.DataFrame(records)
-    df.to_csv(incremental_comparison_classifier_dir.joinpath(f'{dataset_name}.csv'), index=False)
+            kwargs = kwargs[0] if kwargs else {}
+
+            if y is None:
+                # no ground truth, just make a prediction
+                pred_start_time = timer()
+                # predict
+                y_pred = pred_func(x=x, **kwargs)
+                pred_time_diff = timer() - pred_start_time
+                pred_time += pred_time_diff
+            else:
+                # there's a ground truth, model and metric can be updated
+
+                # update the metrics
+                if y_pred != {} and y_pred is not None:
+                    metric.update(y_true=y, y_pred=y_pred)
+                    y_pred = max(y_pred, key=y_pred.get) if type(y_pred) is dict else y_pred
+                    record = {
+                        'index': i,
+                        'y_true': y,
+                        'y_pred': y_pred
+                    }
+                    for metric_idx, (metric_name, _) in enumerate(metrics):
+                        record[metric_name] = metric.data[metric_idx].get()
+                    records.append(record)
+
+                learn_one_start_time = timer()
+                # learn
+                model.learn_one(x=x, y=y, **kwargs)
+                learn_time_diff = timer() - learn_one_start_time
+                train_time += learn_time_diff
+
+        df = pd.DataFrame(records)
+        df.to_csv(incremental_comparison_classifier_dir.joinpath(f'{dataset_name}.csv'), index=False)
+
+    except Exception as e:
+        print(f"Error while running {classifier_name}, metrics will be set to 0", e)
 
     result = {
         'Dataset': dataset_name,
@@ -232,7 +254,12 @@ def process_incremental_comparison_single(classifier_factory, classifier_name,
     }
 
     for metric_idx, (metric_name, _) in enumerate(metrics):
-        result[metric_name] = metric.data[metric_idx].get()
+        try:
+            value = metric.data[metric_idx].get()
+            result[metric_name] = float(value)
+        except Exception as e:
+            print(f"Error while calculating {metric} for {classifier_name}, value will be set to 0", e)
+            result[metric_name] = 0.
 
     return result
 
@@ -241,7 +268,8 @@ def process_incremental_comparison(
     datasets: typing.List[typing.Union[ClassificationDatasetBase, river.datasets.base.Dataset]],
     classifiers: typing.List[typing.Tuple[str, typing.Callable]],
     result_dir: Path,
-    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS
+    metrics: typing.Sequence[typing.Tuple[str, typing.Callable]] = DEFAULT_INCREMENTAL_METRICS,
+    progress=lambda progress, total: None,
 ):
     """
     Runs comparison for provided datasets and incremental classifiers.
@@ -250,6 +278,7 @@ def process_incremental_comparison(
     :param classifiers: classifiers collection
     :param result_dir: results directory
     :param metrics: metrics collection
+    :param progress: function that can be used to monitor progress
 
     """
 
@@ -260,6 +289,7 @@ def process_incremental_comparison(
     df = None
 
     with tqdm(total=len(datasets), desc='Processing comparison', unit='dataset') as pbar:
+        progress(pbar.n, pbar.total)
         for dataset_idx, dataset in enumerate(datasets):
 
             # preload dataset to prevent race conditions on file savings and count classes
@@ -276,6 +306,7 @@ def process_incremental_comparison(
             )
             records.extend(rows)
             pbar.update(1)
+            progress(pbar.n, pbar.total)
 
             df = pd.DataFrame(records)
             df = df.sort_values(by=['Dataset', 'Algorithm'])

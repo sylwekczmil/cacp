@@ -1,7 +1,6 @@
 import dataclasses
 import typing
 from abc import ABC, abstractmethod
-from enum import Enum
 from pathlib import Path
 from urllib.request import urlretrieve
 from zipfile import ZipFile
@@ -10,6 +9,7 @@ import numpy as np
 import pandas as pd
 import typing_extensions
 from sklearn import preprocessing
+from sklearn.model_selection import KFold
 from tqdm import tqdm
 
 BASE_KEEL_DATASETS_URL = 'https://github.com/sylwekczmil/cacp_files/raw/main/'
@@ -70,10 +70,13 @@ class ClassificationFoldDataNormalizer(ClassificationFoldDataModifierBase):
         )
 
 
-class ClassificationDatasetBase(ABC):
+class ClassificationDatasetMinimalBase(ABC):
     """
-    Base class for classification dataset that represents single dataset.
+    Minimal base class for classification dataset that represents single dataset.
     """
+
+    def __init__(self, seed=1):
+        self.seed = seed
 
     @abstractmethod
     def folds(
@@ -85,10 +88,20 @@ class ClassificationDatasetBase(ABC):
         pass
 
     def __iter__(self):
+        random_state = np.random.RandomState(seed=self.seed)
         for fold in self.folds():
-            for x_data, y in zip(fold.x_test, fold.y_test):
+            idx = random_state.permutation(np.arange(len(fold.x_test)))
+            x_test = fold.x_test[idx]
+            y_test = fold.y_test[idx]
+            for x_data, y in zip(x_test, y_test):
                 x = {i: value for i, value in enumerate(x_data)}
                 yield x, y
+
+
+class ClassificationDatasetBase(ClassificationDatasetMinimalBase):
+    """
+    Base class for classification dataset that represents single dataset.
+    """
 
     @property
     @abstractmethod
@@ -117,11 +130,6 @@ class ClassificationDatasetBase(ABC):
                f'classes: {self.classes}'
 
 
-class DatasetDescriptionFields(str, Enum):
-    Inputs = "@inputs"
-    Outputs = "@outputs"
-
-
 class ClassificationDatasetDownloadProgressBar(tqdm):
     def update_to(self, b=1, bsize=1, t_size=None):
         if t_size is not None:
@@ -134,16 +142,19 @@ class ClassificationDataset(ClassificationDatasetBase):
     Class that represents KEEL single dataset.
     """
 
-    def __init__(self,
-                 name: AVAILABLE_CLASSIFICATION_DATASET_NAMES,
-                 files_cache_path=Path.home().joinpath('cacp_files')
-                 ):
+    def __init__(
+        self, name: AVAILABLE_CLASSIFICATION_DATASET_NAMES,
+        files_cache_path=Path.home().joinpath('cacp_files'),
+        seed=1,
+    ):
         """
         Initializes class instance that represents KEEL single dataset.
 
         :param name: KEEL dataset name
         :param files_cache_path: optional cache file patch where dataset will be downloaded
         """
+
+        super().__init__(seed)
 
         self._name = name
 
@@ -189,7 +200,7 @@ class ClassificationDataset(ClassificationDatasetBase):
         n_folds: AVAILABLE_N_FOLDS = 10,
         dob_scv: bool = True,
         categorical_to_numerical=True
-    ) -> typing.Iterable[ClassificationFoldData]:
+    ) -> typing.Iterator[ClassificationFoldData]:
 
         zip_data_name = f'{self.name}-{n_folds}-{"dobscv" if dob_scv else "fold"}'
         data_path = self._fetch_data(zip_data_name, dob_scv)
@@ -297,9 +308,9 @@ class LocalClassificationDataset(ClassificationDataset):
 
     def __init__(self, name: str, dataset_directory: Path):
         """
-        Initializes class instance that represents KEEL single dataset.
+        Initializes class instance that represents KEEL single local dataset.
 
-        :param name: KEEL dataset name
+        :param name: dataset name
         :param dataset_directory: directory where dataset is stored
         """
         super().__init__(name, dataset_directory)
@@ -309,6 +320,82 @@ class LocalClassificationDataset(ClassificationDataset):
 
     def _fetch_file(self, file_name: str) -> Path:
         return self._files_cache_path.joinpath(file_name)
+
+
+class LocalCsvClassificationDataset(ClassificationDatasetBase):
+    """
+    Class that represents single local dataset that is SCV with header.
+    """
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def instances(self) -> int:
+        return self._instances
+
+    @property
+    def features(self) -> int:
+        return self._features
+
+    @property
+    def classes(self) -> int:
+        return self._classes
+
+    def folds(self, n_folds: AVAILABLE_N_FOLDS = 10, dob_scv: bool = True, categorical_to_numerical=True) -> \
+        typing.Iterable[ClassificationFoldData]:
+        df = self._df()
+
+        if categorical_to_numerical:
+            for attr_name, attr_type_name in zip(df.columns, [t.name for t in df.dtypes]):
+                if attr_type_name == 'category' or attr_type_name == 'object':
+                    df[attr_name] = df[attr_name].astype('category').cat.codes.values
+
+        y = df[self._output_name].values
+        labels = np.unique(y)
+        del df[self._output_name]
+        x = df.values
+
+        kf = KFold(n_splits=n_folds, shuffle=True, random_state=self.seed)
+        for i, (train_index, test_index) in enumerate(kf.split(x), start=1):
+            x_train, x_test = x[train_index], x[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            yield ClassificationFoldData(
+                index=i,
+                labels=labels,
+                x_test=x_test,
+                y_test=y_test,
+                x_train=x_train,
+                y_train=y_train
+            )
+
+    def _df(self):
+        return pd.read_csv(self._dataset_path)
+
+    def _load_metadata(self):
+        df = self._df()
+        self._instances = len(df)
+        self._features = len(df.columns) - 1
+        self._output_name = df.columns[-1]
+        self._classes = len(df[self._output_name].unique())
+
+    def __init__(self, name: str, dataset_path: Path):
+        """
+        Initializes class instance that represents CSV local dataset.
+
+        :param name: dataset name
+        :param dataset_path:path where dataset is stored
+        """
+        super().__init__()
+        self._name = name
+        self._output_name = ""
+        self._dataset_path = dataset_path
+        self._instances = 0
+        self._features = 0
+        self._classes = 0
+        self._load_metadata()
 
 
 def all_datasets() -> typing.List[ClassificationDataset]:

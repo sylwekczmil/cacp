@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 import river.datasets
-from river.ensemble import AdaptiveRandomForestClassifier
+from river.forest import ARFClassifier
 from river.neighbors import KNNClassifier
 from river.tree import HoeffdingTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -76,7 +76,7 @@ def incremental_datasets():
 @pytest.fixture()
 def incremental_classifiers():
     return [
-        ('ARF', lambda n_inputs, n_classes: AdaptiveRandomForestClassifier()),
+        ('ARF', lambda n_inputs, n_classes: ARFClassifier()),
         ('HAT', lambda n_inputs, n_classes: HoeffdingTreeClassifier()),
         ('KNN', lambda n_inputs, n_classes: KNNClassifier()),
     ]

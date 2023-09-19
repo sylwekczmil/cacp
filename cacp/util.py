@@ -3,7 +3,8 @@ import random
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
-from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, \
+    matthews_corrcoef as sk_matthews_corrcoef
 
 
 def seed_everything(seed=1):
@@ -79,3 +80,7 @@ def f1(y_true, y_pred, labels):
 
 def auc(y_true, y_pred, labels):
     return auc_score(y_true, y_pred, average='weighted', multi_class='ovo', labels=labels)
+
+
+def matthews_corrcoef(y_true, y_pred, labels):
+    return sk_matthews_corrcoef(y_true, y_pred)
