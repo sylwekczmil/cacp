@@ -26,8 +26,8 @@ def process_comparison_result_winners_for_metric(metric: str, result_dir: Path) 
     def count_places(place=0):
         count = {a: 0 for a in algorithms}
         names = {a: [] for a in algorithms}
-        for dataset, df_d in df.groupby(['Dataset']):
-            df_d_a_m = df_d.groupby(['Algorithm']).mean().sort_values(by=[metric], ascending=False)
+        for dataset, df_d in df.groupby('Dataset'):
+            df_d_a_m = df_d.groupby('Algorithm').mean(numeric_only=True).sort_values(by=[metric], ascending=False)
             best = df_d_a_m.iloc[place]
             count[best.name] += 1
             names[best.name].append(dataset)

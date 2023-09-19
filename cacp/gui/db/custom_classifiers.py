@@ -31,7 +31,7 @@ class CustomClassifier(TypedDict):
     created_at: float
 
 
-CUSTOM_CLASSIFIERS_DB = TinyDB(CUSTOM_CLASSIFIERS_CODE_DIR / "custom_classifiers.json")
+CUSTOM_CLASSIFIERS_DB = TinyDB(CUSTOM_CLASSIFIERS_CODE_DIR / "classifiers.json")
 CUSTOM_CLASSIFIER_BATCH_CODE_TEMPLATE = """import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 

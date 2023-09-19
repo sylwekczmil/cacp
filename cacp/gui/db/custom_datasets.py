@@ -34,7 +34,7 @@ class CustomDataset(TypedDict):
     created_at: float
 
 
-CUSTOM_DATASETS_DB = TinyDB(CUSTOM_DATASETS_CODE_DIR / "custom_datasets.json")
+CUSTOM_DATASETS_DB = TinyDB(CUSTOM_DATASETS_CODE_DIR / "datasets.json")
 CUSTOM_DATASET_CODE_TEMPLATE = """import typing
 
 import numpy as np

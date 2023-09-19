@@ -6,7 +6,7 @@ from typing import TypeVar, Generic, List
 
 from pydantic import BaseModel
 
-from cacp.gui.external.shared.schema import type_to_pseudo_pydantic_model
+from cacp.gui.external.shared.schema import parse_model
 from cacp.gui.external.shared.type import get_all_non_abstract_subclasses, to_id
 
 T = TypeVar("T")
@@ -47,7 +47,7 @@ class ClassModel(BaseAppModel, Generic[T]):
     @property
     def json_schema(self) -> dict:
         try:
-            model: Type[BaseModel] = type_to_pseudo_pydantic_model(self.class_type)
+            model: Type[BaseModel] = parse_model(self.class_type)
             schema = model.schema()
             return schema
         except Exception as e:
@@ -65,6 +65,7 @@ class ClassModel(BaseAppModel, Generic[T]):
         for sub_class in get_all_non_abstract_subclasses(cls.base_class()):
             try:
                 model: T = cls.from_class(sub_class)
+                model.test()
                 _id = to_id(sub_class)
                 model.id = _id
                 result[_id] = model
@@ -77,3 +78,11 @@ class ClassModel(BaseAppModel, Generic[T]):
     @lru_cache
     def get_by_id(cls, _id: str) -> T:
         return cls.all_dict().get(_id)
+
+    def test(self):
+        defaults = {}
+        schema = self.json_schema
+        for k, v in schema.get("properties").items():
+            if default := v.get("default"):
+                defaults[k] = default
+        self.class_type(**defaults)

@@ -17,7 +17,7 @@ def process_times(result_dir: Path):
     time_dir.mkdir(exist_ok=True, parents=True)
     gb = ['Algorithm']
     dfg = df.groupby(gb)
-    df = dfg.mean()
+    df = dfg.mean(numeric_only=True)
     columns = ['Train time [s]', 'Prediction time [s]']
     df_csv = df[columns]
     df_csv = df_csv.sort_values(by=columns, ascending=True)

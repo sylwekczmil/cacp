@@ -23,5 +23,4 @@ def parse_classifier(classifier_dict: Dict):
         return lambda n_inputs, n_classes: classifier_type()
     else:
         classifier_type = cast(Callable, locate(classifier_dict["id"]))
-        # TODO: handle n_inputs, n_classes, check if classifiers has them in __init__
         return lambda n_inputs, n_classes: classifier_type(**classifier_dict["init_values"])

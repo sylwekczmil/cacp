@@ -1,12 +1,13 @@
 import shutil
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import TypedDict, List, Dict, Optional
 
 from tinydb import TinyDB
 from tinydb.table import Document
 
-from cacp.gui.custom import CUSTOM_DIR
+from cacp.gui.custom.experiments import CUSTOM_EXPERIMENTS_DIR
 from cacp.gui.db import DB_PATH
 from cacp.gui.preview import preview_prevent_modifications
 
@@ -34,8 +35,12 @@ class Experiment(TypedDict):
     created_at: float
 
 
-EXPERIMENTS_DB = TinyDB(CUSTOM_DIR / "experiments.json")
+EXPERIMENTS_DB = TinyDB(CUSTOM_EXPERIMENTS_DIR / "experiments.json")
 EXPERIMENTS_PATH = (DB_PATH / "experiments").resolve()
+
+
+def _path(experiment_id: int) -> Path:
+    return CUSTOM_EXPERIMENTS_DIR.joinpath(str(experiment_id))
 
 
 def _convert_from_document_to_experiment(experiment: Document) -> Experiment:
@@ -43,6 +48,7 @@ def _convert_from_document_to_experiment(experiment: Document) -> Experiment:
     experiment["number of datasets"] = len(experiment["datasets"])
     experiment["number of classifiers"] = len(experiment["classifiers"])
     experiment["created at"] = datetime.fromtimestamp(experiment["created_at"]).strftime("%Y-%m-%d %H:%M:%S")
+    experiment["path"] = str(_path(experiment.doc_id))
     return experiment
 
 
@@ -68,7 +74,6 @@ def add_experiment(
     new_experiment["status"] = ExperimentStatus.RUNNING
     new_experiment["created_at"] = datetime.now().timestamp()
     experiment_id = EXPERIMENTS_DB.insert(new_experiment)
-    EXPERIMENTS_DB.update({"path": str((EXPERIMENTS_PATH / str(experiment_id)).as_posix())}, doc_ids=[experiment_id])
     return experiment_id
 
 
@@ -79,6 +84,5 @@ def update_experiment_status(experiment_id: int, experiment_status: ExperimentSt
 
 def delete_experiment(experiment_id: int):
     preview_prevent_modifications()
-    experiment = get_experiment(experiment_id)
-    shutil.rmtree(experiment["path"], ignore_errors=True)
+    shutil.rmtree(_path(experiment_id), ignore_errors=True)
     EXPERIMENTS_DB.remove(doc_ids=[experiment_id])

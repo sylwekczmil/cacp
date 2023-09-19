@@ -1,4 +1,6 @@
 from cacp.gui.external.classifier import parse_classifier
+from cacp.gui.external.river_library.classifier import RiverClassifierModel
+from cacp.gui.external.sklearn_library.classifier import SklearnClassifierModel
 
 
 def test_parse_sklearn_classifier():
@@ -52,3 +54,11 @@ def test_parse_sklearn_classifier():
         "name": "DecisionTreeClassifier",
     })
     assert classifier(1, 1).max_depth == 1
+
+
+def test_list_keel_classifiers():
+    assert len(RiverClassifierModel.all()) == 24
+
+
+def test_list_sklearn_classifiers():
+    assert len(SklearnClassifierModel.all()) == 34

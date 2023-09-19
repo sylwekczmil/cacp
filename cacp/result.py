@@ -19,8 +19,8 @@ def process_comparison_results(result_dir: Path,
 
     gb = ['Algorithm']
     dfg = df.groupby(gb)
-    df = dfg.mean()
-    dfg_std = dfg.std()
+    df = dfg.mean(numeric_only=True)
+    dfg_std = dfg.std(numeric_only=True)
 
     metrics_names = [name for name, _ in metrics]
 

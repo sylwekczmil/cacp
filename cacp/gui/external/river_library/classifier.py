@@ -1,4 +1,5 @@
-from typing import Type
+from functools import lru_cache
+from typing import Type, List
 
 import river
 from river.base import Classifier
@@ -14,6 +15,11 @@ class RiverClassifierModel(ClassModel):
     @classmethod
     def base_class(cls):
         return Classifier
+
+    @classmethod
+    @lru_cache
+    def all(cls) -> List["RiverClassifierModel"]:
+        return [c for c in cls.all_dict().values() if "Base" not in c.name]
 
     @classmethod
     def from_class(cls, source_class: Type) -> "RiverClassifierModel":

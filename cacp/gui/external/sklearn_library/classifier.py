@@ -1,3 +1,4 @@
+import contextlib
 from functools import lru_cache
 from typing import Type, Dict
 
@@ -24,16 +25,20 @@ class SklearnClassifierModel(ClassModel):
         docs_version = f"{docs_version_split[0]}.{docs_version_split[1]}"
         docs_split = _id.split(".")
         docs_name = ".".join(s for s in docs_split if not s.startswith("_"))
-        return cls(
+        model = cls(
             id=_id,
             name=source_class.__name__,
             docs_url=f"https://scikit-learn.org/{docs_version}/modules/generated/{docs_name}.html"
         )
+        with contextlib.suppress(Exception):
+            model.test()
+            return model
 
     @classmethod
     @lru_cache
     def all_dict(cls) -> Dict[str, T]:
         result = {}
         for name, c in all_estimators(type_filter="classifier"):
-            result[name] = cls.from_class(c)
+            if model := cls.from_class(c):
+                result[name] = model
         return result

@@ -1,7 +1,6 @@
 import dataclasses
 import typing
 from abc import ABC, abstractmethod
-from enum import Enum
 from pathlib import Path
 from urllib.request import urlretrieve
 from zipfile import ZipFile
@@ -129,11 +128,6 @@ class ClassificationDatasetBase(ClassificationDatasetMinimalBase):
                f'instances: {self.instances}, ' \
                f'features: {self.features}, ' \
                f'classes: {self.classes}'
-
-
-class DatasetDescriptionFields(str, Enum):
-    Inputs = "@inputs"
-    Outputs = "@outputs"
 
 
 class ClassificationDatasetDownloadProgressBar(tqdm):

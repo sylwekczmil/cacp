@@ -42,9 +42,15 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
             "margin-left": "18rem",
             "margin-right": "2rem",
             "padding": "2rem 1rem",
-        }, children=[page_container]),
+        }, children=[page_container]),  # https://cacp.readthedocs.io/
+
         dbc.Alert(
-            "CACP is in PREVIEW mode, some actions are locked. To enable them, run an instance on your machine.",
+            html.Div([
+                html.Span(
+                    "CACP is in PREVIEW mode, some actions are locked. "
+                    "To enable them, run an instance on your machine "),
+                html.A("https://cacp.readthedocs.io/", href="https://cacp.readthedocs.io/", target="_blank")
+            ]),
             color="info",
             dismissable=True,
             is_open=True,
@@ -57,13 +63,11 @@ def start(debug: bool = False, host="127.0.0.1", port=8050):
                 "margin": "0 auto"
             }
         ) if is_preview() else "",
-
     ])
     app.logger.setLevel(log_level)
 
     print(f"CACP stared on http://{host}:{port}/")
-    # app.run_server(debug=debug, host=host, port=port) TODO
-    app.run_server(debug=True, host=host, port=port)
+    app.run_server(debug=debug, host=host, port=port)
 
 
 if __name__ == "__main__":

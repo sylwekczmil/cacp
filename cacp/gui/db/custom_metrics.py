@@ -34,7 +34,7 @@ class CustomMetric(TypedDict):
     created_at: float
 
 
-CUSTOM_METRICS_DB = TinyDB(CUSTOM_METRICS_CODE_DIR / "custom_metrics.json")
+CUSTOM_METRICS_DB = TinyDB(CUSTOM_METRICS_CODE_DIR / "metrics.json")
 CUSTOM_METRIC_BATCH_CODE_TEMPLATE = """import numpy as np
 
 

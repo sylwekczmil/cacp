@@ -43,10 +43,3 @@ def get_all_non_abstract_subclasses(cls):
     import_submodules(str(cls.__module__).split('.')[0])
     all_subclasses = get_all_subclasses(cls)
     return [s for s in all_subclasses if not isabstract(s)]
-
-
-PRIMITIVE_TYPES = (bool, int, float, complex, str)
-
-
-def is_primitive_type(thing):
-    return thing in PRIMITIVE_TYPES

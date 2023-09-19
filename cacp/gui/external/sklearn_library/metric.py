@@ -48,8 +48,3 @@ class SklearnMetricModel(BaseAppModel):
     @lru_cache
     def get_by_id(cls, _id: str) -> T:
         return cls.all_dict().get(_id)
-
-
-if __name__ == "__main__":
-    a = SklearnMetricModel.all_dict()
-    print(a)

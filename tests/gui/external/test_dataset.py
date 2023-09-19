@@ -2,6 +2,7 @@ from river.datasets.synth import AnomalySine
 
 from cacp import ClassificationDataset
 from cacp.gui.external.dataset import parse_dataset
+from cacp.gui.external.river_library.dataset import RiverDatasetModel
 
 
 def test_parse_keel_dataset():
@@ -78,3 +79,7 @@ def test_parse_river_dataset():
     assert dataset.name == "AnomalySine"
     assert isinstance(dataset, AnomalySine)
     assert dataset.n_samples == 3333
+
+
+def test_list_keel_datasets():
+    assert len(RiverDatasetModel.all()) == 53

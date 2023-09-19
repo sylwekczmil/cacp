@@ -1,4 +1,6 @@
-from typing import Type
+import contextlib
+from functools import lru_cache
+from typing import Type, List
 
 import river
 from river.metrics.base import ClassificationMetric
@@ -16,6 +18,18 @@ class RiverMetricModel(ClassModel):
         return ClassificationMetric
 
     @classmethod
+    @lru_cache
+    def all(cls) -> List["RiverMetricModel"]:
+        result = []
+        for k, v in cls.all_dict().items():
+            with contextlib.suppress(NotImplementedError):
+                m = v.class_type()
+                if hasattr(m, "get") and isinstance(m.get(), float):
+                    result.append(v)
+
+        return result
+
+    @classmethod
     def from_class(cls, source_class: Type) -> "RiverMetricModel":
         _id = to_id(source_class)
         docs_split = _id.split(".")
@@ -26,8 +40,3 @@ class RiverMetricModel(ClassModel):
             name=source_class.__name__,
             docs_url=f"https://riverml.xyz/{docs_version}/api/{docs_split[1].replace('_', '-')}/{docs_name}/"
         )
-
-
-if __name__ == '__main__':
-    me = RiverMetricModel.all()
-    print(me)
