@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'CACP'
-copyright = "2022, Sylwester Czmil, Jacek Kluska, Anna Czmil"
+copyright = "2023, Sylwester Czmil, Jacek Kluska, Anna Czmil"
 html_show_copyright = False
 author = "Sylwester Czmil"
 

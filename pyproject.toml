@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cacp"
-version = "1.0.0a2"
+version = "1.0.0"
 description = ""
 authors = [
     "Sylwester Czmil <sylwekczmil@gmail.com>",
