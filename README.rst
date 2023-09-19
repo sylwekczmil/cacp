@@ -6,6 +6,7 @@ CACP: Classification Algorithms Comparison Pipeline
 .. image:: https://img.shields.io/pypi/v/cacp.svg
         :target: https://pypi.python.org/pypi/cacp
 
+
 .. image:: https://github.com/sylwekczmil/cacp/actions/workflows/tox.yml/badge.svg
         :target: https://github.com/sylwekczmil/cacp/actions/workflows/tox.yml
 
@@ -14,8 +15,10 @@ CACP: Classification Algorithms Comparison Pipeline
         :target: https://cacp.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
+
 * Free software: MIT license
-* Documentation: https://cacp.readthedocs.io.
+* Documentation: https://cacp.readthedocs.io
+* GUI Preview: https://cacp.czmil.com
 * Article: https://doi.org/10.1016/j.softx.2022.101134
 
 
