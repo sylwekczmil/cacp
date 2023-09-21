@@ -44,7 +44,7 @@ class NewExperimentForm(html.Div):
                 dbc.Label("Name", html_for=self.ids.name_input(aio_id)),
                 dbc.Input(id=self.ids.name_input(aio_id), placeholder="Enter name"),
                 dbc.FormText(
-                    "Provide name for your experiment, it should be unique.",
+                    "Provide a name for your experiment. It should be unique.",
                     color="secondary",
                 ),
             ],
@@ -56,8 +56,8 @@ class NewExperimentForm(html.Div):
                 dbc.Label("Type", html_for=self.ids.type_input(aio_id)),
                 dbc.RadioItems(
                     {
-                        ExperimentType.BATCH: "Batch learning (k-fold Cross-Validation)",
-                        ExperimentType.INCREMENTAL: "Incremental learning (Prequential evaluation)"
+                        ExperimentType.BATCH: "Batch learning (k-fold cross-validation)",
+                        ExperimentType.INCREMENTAL: "Incremental learning (prequential evaluation)"
                     },
                     value=ExperimentType.BATCH,
                     id=self.ids.type_input(aio_id)
@@ -70,17 +70,17 @@ class NewExperimentForm(html.Div):
             className="py-2",
         )
         custom_datasets_selection = SelectionModal(
-            "Add Custom dataset", CustomDatasetsTable, aio_id=f"{aio_id}-kd"
+            "Add custom dataset", CustomDatasetsTable, aio_id=f"{aio_id}-kd"
         )
         keel_datasets_selection = SelectionModal(
-            "Add Keel dataset", KeelDatasetsTable, aio_id=f"{aio_id}-cd", button_kwargs=dict(className="mx-2"),
+            "Add KEEL dataset", KeelDatasetsTable, aio_id=f"{aio_id}-cd", button_kwargs=dict(className="mx-2"),
         )
         river_datasets_selection = SelectionModal(
             "Add River dataset", RiverDatasetsTable,
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-rd"
         )
         custom_classifiers_selection = SelectionModal(
-            "Add Custom classifiers", CustomClassifiersTable, aio_id=f"{aio_id}-cc"
+            "Add custom classifiers", CustomClassifiersTable, aio_id=f"{aio_id}-cc"
         )
         river_classifiers_selection = SelectionModal(
             "Add River classifiers", RiverClassifiersTable,
@@ -91,7 +91,7 @@ class NewExperimentForm(html.Div):
             button_kwargs=dict(className="d-none"), aio_id=f"{aio_id}-sc"
         )
         custom_metrics_selection = SelectionModal(
-            "Add Custom metric", CustomMetricsTable, aio_id=f"{aio_id}-cm"
+            "Add custom metric", CustomMetricsTable, aio_id=f"{aio_id}-cm"
         )
         river_metrics_selection = SelectionModal(
             "Add River metric", RiverMetricsTable,
@@ -308,13 +308,13 @@ class NewExperimentForm(html.Div):
             if n_clicks:
                 errors = []
                 if not name_value:
-                    errors.append("Name can not be empty.")
+                    errors.append("Name cannot be empty.")
                 if len(selected_datasets) == 0:
-                    errors.append("At least 1 dataset need to be selected.")
+                    errors.append("Selecting at least one dataset is required.")
                 if len(selected_classifiers) < 2:
-                    errors.append("At least 2 classifiers need to be selected.")
+                    errors.append("Selecting at least two classifiers is required.")
                 if len(selected_metrics) == 0:
-                    errors.append("At least 1 metric need to be selected.")
+                    errors.append("Selecting at least one metric is required.")
                 if errors:
                     toast_message = dbc.Alert([html.Div(e) for e in errors], color="danger")
                     toast_is_open = True

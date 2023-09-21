@@ -49,7 +49,7 @@ def layout(custom_dataset_id=None):
                 {
                     CustomDatasetType.CUSTOM_CODE: "Custom code",
                     CustomDatasetType.CSV_FILE: "CSV file (last column will be treated as class column)",
-                    CustomDatasetType.KEEL_FILES: "Keel files (should have KEEL datasets structure)"
+                    CustomDatasetType.KEEL_FILES: "KEEL files (should have KEEL datasets structure)"
                 },
                 value=custom_dataset.get("type"),
                 id=CUSTOM_DATASET_TYPE_ID
