@@ -7,6 +7,7 @@ Welcome to cacp's documentation!
 
    readme
    installation
+   gui
    example_results
    modules
    contributing
