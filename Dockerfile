@@ -11,10 +11,7 @@ ENV POETRY_NO_INTERACTION=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
-
 COPY . .
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --only-root
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install
 
 ENTRYPOINT ["cacp", "--host", "0.0.0.0"]

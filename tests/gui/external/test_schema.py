@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from river.neighbors import KNNClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 from cacp.gui.external.river_library.classifier import RiverClassifierModel
 from cacp.gui.external.river_library.dataset import RiverDatasetModel
@@ -21,7 +22,7 @@ def test_schema_creation_on_all():
         assert model.json_schema is not None
 
 
-def test_knn_classifier():
+def test_river_knn_classifier():
     model = parse_model(KNNClassifier)
     schema = model.schema()
     assert schema == {'title': 'KNNClassifier', 'type': 'object',
@@ -29,6 +30,16 @@ def test_knn_classifier():
                                      'weighted': {'title': 'Weighted', 'default': True, 'type': 'boolean'},
                                      'cleanup_every': {'title': 'Cleanup Every', 'default': 0, 'type': 'integer'},
                                      'softmax': {'title': 'Softmax', 'default': False, 'type': 'boolean'}}}
+
+
+def test_sklearn_knn_classifier():
+    model = parse_model(KNeighborsClassifier)
+    schema = model.schema()
+    assert schema == {'title': 'KNeighborsClassifier', 'type': 'object',
+                      'properties': {'n_neighbors': {'title': 'N Neighbors', 'default': 5, 'type': 'integer'},
+                                     'leaf_size': {'title': 'Leaf Size', 'default': 30, 'type': 'integer'},
+                                     'p': {'title': 'P', 'default': 2, 'type': 'integer'},
+                                     'n_jobs': {'title': 'N Jobs', 'type': 'integer'}}}
 
 
 def test_simple_schema():
