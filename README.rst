@@ -154,7 +154,7 @@ https://github.com/sylwekczmil/cacp/tree/main/cacp_examples_incremental.
 .. code:: python3
 
     import river
-    from river.ensemble import AdaptiveRandomForestClassifier
+    from river.forest import ARFClassifier
     from river.naive_bayes import GaussianNB
     from river.neighbors import KNNClassifier
     from river.tree import HoeffdingTreeClassifier
@@ -174,7 +174,7 @@ https://github.com/sylwekczmil/cacp/tree/main/cacp_examples_incremental.
 
         # select incremental classifiers
         experimental_classifiers = [
-            ('ARF', lambda n_inputs, n_classes: AdaptiveRandomForestClassifier()),
+            ('ARF', lambda n_inputs, n_classes: ARFClassifier()),
             ('HAT', lambda n_inputs, n_classes: HoeffdingTreeClassifier()),
             ('KNN', lambda n_inputs, n_classes: KNNClassifier()),
             ('GNB', lambda n_inputs, n_classes: GaussianNB()),

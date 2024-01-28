@@ -21,7 +21,7 @@ class RiverDataSetType(str, Enum):
 
     def docs_url(self):
         docs_version = river.__version__
-        docs_api_sub_path = "synth" if self == RiverDataSetType.SYNTHETIC else "datasets"
+        docs_api_sub_path = "datasets/synth" if self == RiverDataSetType.SYNTHETIC else "datasets"
         return f"https://riverml.xyz/{docs_version}/api/{docs_api_sub_path}/"
 
 
