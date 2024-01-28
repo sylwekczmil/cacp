@@ -1,5 +1,5 @@
 ,Name,Class Name,Library,Type
-1,ARF,AdaptiveRandomForest,river,incremental
-2,GNB,GaussianNB,river,incremental
-3,HAT,HoeffdingTree,river,incremental
-4,KNN,KNN,river,incremental
+1,ARF,ARFClassifier,river,INCREMENTAL
+2,GNB,GaussianNB,river,INCREMENTAL
+3,HAT,HoeffdingTreeClassifier,river,INCREMENTAL
+4,KNN,KNNClassifier,river,INCREMENTAL

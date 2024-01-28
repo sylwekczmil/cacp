@@ -82,4 +82,4 @@ def test_parse_river_dataset():
 
 
 def test_list_keel_datasets():
-    assert len(RiverDatasetModel.all()) == 53
+    assert len(RiverDatasetModel.all()) == 54
