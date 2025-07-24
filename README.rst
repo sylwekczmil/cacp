@@ -11,11 +11,6 @@ CACP: Classification Algorithms Comparison Pipeline
         :target: https://github.com/sylwekczmil/cacp/actions/workflows/test.yml
 
 
-.. image:: https://readthedocs.org/projects/cacp/badge/?version=latest
-        :target: https://cacp.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
 * Free software: MIT license
 * Documentation: https://cacp.readthedocs.io
 * GUI Preview: https://cacp.czmil.com
